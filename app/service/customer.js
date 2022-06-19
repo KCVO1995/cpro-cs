@@ -30,7 +30,7 @@ class CustomerService extends Service {
   }
   importOne(customer) {
     const { ctx } = this;
-    const { access_token } = ctx.app.profile;
+    const access_token = ctx.service.token.get();
     const user = this.getUserByCustomer(customer);
     return ctx
       .curl(
@@ -60,7 +60,7 @@ class CustomerService extends Service {
   }
   async updateOne(customer) {
     const { ctx } = this;
-    const { access_token } = ctx.app.profile;
+    const access_token = ctx.service.token.get();
     const c = await ctx.model.Customer.findAll({
       where: {
         yhsd_id: customer.id,

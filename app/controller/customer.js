@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 18:35:51
+ * :date last edited: 2022-06-19 19:15:36
  */
 /*
  * :file description:
@@ -38,7 +38,6 @@ class CustomerController extends Controller {
   }
   async update() {
     const { ctx } = this;
-    console.log(ctx.request.body, 'update customer');
     ctx.logger.info('yshd update customer %j', ctx.request.body);
     try {
       await ctx.service.customer.updateOne(ctx.request.body);
