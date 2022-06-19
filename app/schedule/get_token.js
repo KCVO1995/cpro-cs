@@ -14,7 +14,7 @@ class GetToken extends Subscription {
   // subscribe 是真正定时任务执行时被运行的函数
   async subscribe() {
     const res = await this.ctx.curl(
-      'https://dopen.weimob.com/fuwu/b/oauth2/token?grant_type=client_credentials&client_id=4FF19749D0F5F4A1294ECC312586C918&client_secret=9D0C75C6DCDB050318D2F8478BDBE45E&shop_id=4020502275894&shop_type=business_operation_system_id',
+      'https://dopen.weimob.com/fuwu/b/oauth2/token?grant_type=client_credentials&client_id=4FF19749D0F5F4A1294ECC312586C918&client_secret=9D0C75C6DCDB050318D2F8478BDBE45E&shop_id=4020505860894&shop_type=business_operation_system_id',
       {
         method: 'POST',
         dataType: 'json',

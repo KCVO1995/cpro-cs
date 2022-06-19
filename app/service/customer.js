@@ -27,6 +27,8 @@ class CustomerService extends Service {
         dataType: 'json',
       }
     );
+    const customer = await ctx.model.Customer.create({ yhsd_id: 123222, wid: 111111 });
+    console.log(customer);
     console.log(res.data);
   }
 }
