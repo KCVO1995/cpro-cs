@@ -46,14 +46,13 @@ class CustomerService extends Service {
         }
       )
       .then(res => {
-        // ctx.logger.info('weimob import customer %j', res.data);
-        // const { code } = res;
-        // if (code.errcode === '0') {
-        //   this.afterImportOne(customer, res);
-        //   return 'ok';
-        // }
-        // return Promise.reject(res);
-        this.afterImportOne({ id: 111 }, { data: { successList: [{ wid: '111' }] } });
+        ctx.logger.info('weimob import customer %j', res.data);
+        const { code } = res;
+        if (code.errcode === '0') {
+          this.afterImportOne(customer, res);
+          return 'ok';
+        }
+        return Promise.reject(res);
       }, e => {
         ctx.logger.error('weimob import customer error %j', e);
       });

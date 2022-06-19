@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 19:01:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 20:48:31
+ * :date last edited: 2022-06-19 21:05:36
  */
 'use strict';
 const Service = require('egg').Service;
@@ -31,6 +31,7 @@ class TokenService extends Service {
     );
     console.log('获取 token ------ ', res.data);
     const { data: { expires_in, access_token } } = res;
+    ctx.model.Token.destroy({ where: { shop_id } });
     await ctx.model.Token.create({ shop_id, access_token });
     setTimeout(() => { // 过期自动刷新
       console.log('--------fuck-----------');
