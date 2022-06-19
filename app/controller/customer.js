@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 18:08:49
+ * :date last edited: 2022-06-19 18:35:51
  */
 /*
  * :file description:
@@ -27,7 +27,6 @@ class CustomerController extends Controller {
   }
   async create() {
     const { ctx } = this;
-    console.log(ctx.request.body, 'create customer');
     ctx.logger.info('yshd create customer %j', ctx.request.body);
     try {
       await ctx.service.customer.importOne(ctx.request.body);
