@@ -3,6 +3,103 @@
 const Service = require('egg').Service;
 
 class CustomerService extends Service {
+  async afterImportOne(customer, weimobResponse) {
+    const {
+      data: { successList },
+    } = weimobResponse;
+    if (successList.length > 0 && successList[0].wid) {
+      await this.ctx.model.Customer.create({
+        yhsd_id: customer.id,
+        wid: successList[0].wid,
+      });
+    }
+  }
+  getUserByCustomer(customer) {
+    const user = {
+      userName: customer.name,
+      phone:
+        customer.reg_type === 'mobile'
+          ? customer.reg_identity
+          : customer.notify_phone,
+    };
+    if (customer.reg_identity === 'social') {
+      user.openId = customer.reg_identity;
+      user.appId = 'wx377d010f474c10ad';
+    }
+    return user;
+  }
+  importOne(customer) {
+    const { ctx } = this;
+    const { access_token } = ctx.app.profile;
+    const user = this.getUserByCustomer(customer);
+    return ctx
+      .curl(
+        `https://dopen.weimob.com/apigw/weimob_crm/v2.0/customer/import?accesstoken=${access_token}`,
+        {
+          method: 'POST',
+          data: {
+            importType: 1,
+            userList: [ user ],
+          },
+          contentType: 'json',
+          dataType: 'json',
+        }
+      )
+      .then(res => {
+        ctx.logger.info('weimob import customer %j', res.data);
+        const { code } = res;
+        if (code.errcode === '0') {
+          this.afterImportOne(customer, res);
+          return 'ok';
+        }
+        return Promise.reject(res);
+
+      }, e => {
+        ctx.logger.error('weimob import customer error %j', e);
+      });
+  }
+  async updateOne(customer) {
+    const { ctx } = this;
+    const { access_token } = ctx.app.profile;
+    const c = await ctx.model.Customer.findAll({
+      where: {
+        yhsd_id: customer,
+      },
+    });
+    const user = this.getUserByCustomer(customer);
+    if (c.wid) {
+      return ctx
+        .curl(
+          `https://dopen.weimob.com/apigw/weimob_crm/v2.0/customer/update?accesstoken=${access_token}`,
+          {
+            method: 'POST',
+            data: {
+              vid: '', // TODO vid
+              wid: c.wid,
+              ...user,
+            },
+            contentType: 'json',
+            dataType: 'json',
+          }
+        )
+        .then(
+          res => {
+            ctx.logger.info('weimob update customer %j', res.data);
+            const { code } = res;
+            if (code.errcode === '0') return 'ok';
+            if (code.errcode === '001460020011004') {
+              this.importOne(customer);
+              return 'ok';
+            }
+            return Promise.reject(res);
+          },
+          e => {
+            ctx.logger.error('weimob update customer error %j', e);
+          }
+        );
+    }
+
+  }
   async importOneTest() {
     const { ctx } = this;
     const { access_token } = ctx.app.profile;
@@ -27,9 +124,6 @@ class CustomerService extends Service {
         dataType: 'json',
       }
     );
-    const customer = await ctx.model.Customer.create({ yhsd_id: 123222, wid: 111111 });
-    console.log(customer);
-    console.log(res.data);
   }
 }
 

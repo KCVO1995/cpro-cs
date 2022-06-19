@@ -6,7 +6,7 @@ class GetToken extends Subscription {
   static get schedule() {
     return {
       immediate: true,
-      interval: '7000s', // 1 分钟间隔
+      interval: '7000s', // TODO 动态时间
       type: 'all', // 指定所有的 worker 都需要执行
     };
   }
@@ -21,7 +21,6 @@ class GetToken extends Subscription {
       }
     );
     this.ctx.app.profile = res.data;
-    this.service.customer.importOneTest();
     console.log(this.ctx.app.profile, 'token');
   }
 }
