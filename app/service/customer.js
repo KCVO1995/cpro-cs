@@ -1,6 +1,7 @@
 'use strict';
 // app/service/user.js
 const Service = require('egg').Service;
+const { APIS } = require('../constants/index');
 
 class CustomerService extends Service {
   async afterImportOne(customer, weimobResponse) {
@@ -33,48 +34,39 @@ class CustomerService extends Service {
     const access_token = ctx.service.token.get();
     const user = this.getUserByCustomer(customer);
     return ctx
-      .curl(
-        `https://dopen.weimob.com/apigw/weimob_crm/v2.0/customer/import?accesstoken=${access_token}`,
-        {
-          method: 'POST',
-          data: {
-            importType: 1,
-            userList: [ user ],
-          },
-          contentType: 'json',
-          dataType: 'json',
+      .curl(`${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`, {
+        method: 'POST',
+        data: {
+          importType: 1,
+          userList: [ user ],
+        },
+        contentType: 'json',
+        dataType: 'json',
+      })
+      .then(
+        res => {
+          ctx.logger.info('weimob import customer %j', res.data);
+          const { code } = res;
+          if (code.errcode === '0') {
+            this.afterImportOne(customer, res);
+            return 'ok';
+          }
+          return Promise.reject(res);
+        },
+        e => {
+          ctx.logger.error('weimob import customer error %j', e);
         }
-      )
-      .then(res => {
-        ctx.logger.info('weimob import customer %j', res.data);
-        const { code } = res;
-        if (code.errcode === '0') {
-          this.afterImportOne(customer, res);
-          return 'ok';
-        }
-        return Promise.reject(res);
-      }, e => {
-        ctx.logger.error('weimob import customer error %j', e);
-      });
+      );
   }
   async updateOne(customer) {
     const { ctx } = this;
     const access_token = ctx.service.token.get();
-    const c = await ctx.model.Customer.findAll({
-      where: {
-        yhsd_id: customer.id,
-      },
-    });
-    if (c.length === 0) {
-      this.importOne(customer);
-      return;
-    }
-    const wid = c[0].dataValues.wid;
+    const wid = this.model.Customer.getWidgetIdByYhsdId(customer.id);
     if (!wid) return Promise.reject(new Error('wid is null'));
     const user = this.getUserByCustomer(customer);
     return ctx
       .curl(
-        `https://dopen.weimob.com/apigw/weimob_crm/v2.0/customer/update?accesstoken=${access_token}`,
+        `${APIS.UPDATE_CUSTOMER}?accesstoken=${access_token}`,
         {
           method: 'POST',
           data: {
@@ -106,7 +98,7 @@ class CustomerService extends Service {
     const { ctx } = this;
     const { access_token } = ctx.app.profile;
     const res = await ctx.curl(
-      `https://dopen.weimob.com/apigw/weimob_crm/v2.0/customer/import?accesstoken=${access_token}`,
+      `${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`,
       {
         method: 'POST',
         data: {

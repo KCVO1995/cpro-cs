@@ -5,25 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 22:56:43
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 22:58:15
- */
-/*
- * :file description:
- * :name: /cpro-cs/app/model/order.js
- * :author: 李彦辉Jacky
- * :copyright: (c) 2022, Tungee
- * :date created: 2022-06-19 22:53:41
- * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 22:56:07
- */
-/*
- * :file description:
- * :name: /cpro-cs/app/model/customer.js
- * :author: 李彦辉Jacky
- * :copyright: (c) 2022, Tungee
- * :date created: 2022-06-19 14:59:45
- * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 15:18:23
+ * :date last edited: 2022-06-20 21:04:31
  */
 'use strict';
 

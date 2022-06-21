@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 16:56:23
+ * :date last edited: 2022-06-20 21:33:34
  */
 'use strict';
 
@@ -14,6 +14,28 @@
  */
 module.exports = app => {
   const { router, controller } = app;
+  // webhook 创建客户
   router.post('/customer/create', controller.customer.create);
+  // webhook 更新客户
   router.post('/customer/update', controller.customer.update);
+  // webhook 创建订单
+  router.post('/order/create', controller.customer.update);
+  // // webhook 更新订单
+  // router.post('/order/update', controller.customer.update);
+  // // webhook 取消订单
+  // router.post('/order/cancelled', controller.customer.update);
+  // // webhook 退单请求
+  // router.post('/order/request_refund', controller.customer.update);
+  // // webhook 退单完成
+  // router.post('/order/refunded', controller.customer.update);
+  // // webhook 拒绝退单
+  // router.post('/order/refuse_refund', controller.customer.update);
+  // // webhook 订单付款
+  // router.post('/order/paid', controller.customer.update);
+  // // webhook 订单发货
+  // router.post('/order/delivered', controller.customer.update);
+  // // webhook 订单部分发货
+  // router.post('/order/partially_delivered', controller.customer.update);
+  // // webhook 订单完成
+  // router.post('/order/achieved', controller.customer.update)
 };
