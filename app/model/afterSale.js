@@ -5,15 +5,15 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 22:56:43
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-20 21:04:31
+ * :date last edited: 2022-06-21 21:14:39
  */
 'use strict';
 
 module.exports = app => {
   const { DATE, INTEGER, STRING } = app.Sequelize;
 
-  const AfterSales = app.model.define(
-    'orders',
+  const AfterSale = app.model.define(
+    'after_sales',
     {
       id: { type: INTEGER, primaryKey: true, autoIncrement: true },
       order_id: { type: STRING, unique: true },
@@ -29,10 +29,11 @@ module.exports = app => {
     }
   );
 
-  return class extends AfterSales {
-    static associate() {
-      app.model.Tag.belongsTo(app.model.User, { foreignKey: 'order_id' });
-    }
+  AfterSale.associate = function() {
+    app.model.AfterSale.belongsTo(app.model.Order, {
+      foreignKey: 'order_id',
+    });
   };
+  return AfterSale;
 
 };

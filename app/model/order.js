@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 22:53:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 22:58:30
+ * :date last edited: 2022-06-21 21:14:24
  */
 /*
  * :file description:
@@ -40,7 +40,7 @@ module.exports = app => {
   return class extends Order {
 
     static associate() {
-      app.model.Order.hasMany(app.model.AfterSales);
+      app.model.Order.hasMany(app.model.AfterSale);
     }
 
   };

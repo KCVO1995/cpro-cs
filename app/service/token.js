@@ -5,16 +5,15 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 19:01:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 21:05:36
+ * :date last edited: 2022-06-21 21:14:44
  */
 'use strict';
 const Service = require('egg').Service;
 
 const client_id = '4FF19749D0F5F4A1294ECC312586C918';
 const client_secret = '9D0C75C6DCDB050318D2F8478BDBE45E';
-const shop_id = '4020505860894';
-// const shop_type = 'business_operation_system_id';
-const shop_type = '';
+const shop_id = '4020502275894';
+const shop_type = 'business_operation_system_id';
 class TokenService extends Service {
   async get(cache = true) {
     const { ctx } = this;

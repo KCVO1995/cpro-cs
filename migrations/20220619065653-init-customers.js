@@ -5,18 +5,18 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 14:56:53
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 14:57:44
+ * :date last edited: 2022-06-22 22:40:13
  */
 'use strict';
 
 module.exports = {
   // 在执行数据库升级时调用的函数，创建 customers 表
   up: async (queryInterface, Sequelize) => {
-    const { INTEGER, DATE } = Sequelize;
+    const { INTEGER, DATE, BIGINT } = Sequelize;
     await queryInterface.createTable('customers', {
       id: { type: INTEGER, primaryKey: true, autoIncrement: true },
-      wid: { type: INTEGER, unique: true },
-      yhsd_id: { type: INTEGER, unique: true },
+      wid: { type: BIGINT, unique: true },
+      yhsd_id: { type: BIGINT, unique: true },
       created_at: DATE(6),
       updated_at: DATE(6),
     });

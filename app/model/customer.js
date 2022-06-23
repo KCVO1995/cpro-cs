@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 14:59:45
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-20 22:07:40
+ * :date last edited: 2022-06-22 22:29:27
  */
 'use strict';
 
@@ -28,15 +28,16 @@ module.exports = app => {
     }
   );
 
-  return class extends Customer {
-    async getWidByYhsdId(yhsdId) {
-      const c = await this.findOne({
-        where: {
-          yhsd_id: yhsdId,
-        },
-      });
-      return c.dataValues.wid;
-    }
+  Customer.getWidByYhsdId = async function(yhsdId) {
+    const c = await this.findOne({
+      where: {
+        yhsd_id: yhsdId,
+      },
+    });
+    if (c && c.dataValues && c.dataValues.wid) return c.dataValues.wid;
+    return undefined;
   };
+
+  return Customer;
 
 };
