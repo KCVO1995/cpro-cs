@@ -48,8 +48,4 @@ CREATE DATABASE cs_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE cs_production CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-腾讯云秘密：CollegePro2022
-mysql
-A temporary password is generated for root@localhost: uW#m<c<Rl6mr
-
 [egg]: https://eggjs.org

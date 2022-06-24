@@ -5,12 +5,11 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-23 10:42:49
+ * :date last edited: 2022-06-24 16:56:30
  */
 'use strict';
-// TODO 客户头像
 const Service = require('egg').Service;
-const { APIS } = require('../constants/index');
+const { APIS, SHOP_INFO } = require('../constants/index');
 
 class CustomerService extends Service {
   async afterImportOne(customer, wid) {
@@ -25,9 +24,9 @@ class CustomerService extends Service {
       appChannel: 3,
       userKey: 1,
       belongVidName: 'Collegepro',
-      belongVid: 6015252206894,
+      belongVid: SHOP_INFO.VID,
     };
-    if (customer.reg_identity === 'mobile') {
+    if (customer.reg_type === 'mobile') {
       user.phone = customer.reg_identity;
     }
     if (customer.reg_type === 'social') {
@@ -40,6 +39,7 @@ class CustomerService extends Service {
     const { ctx } = this;
     const access_token = await ctx.service.token.get();
     const user = this.getUserByCustomer(customer);
+    ctx.logger.info('request customer %j', user);
     return ctx
       .curl(`${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`, {
         method: 'POST',
@@ -88,11 +88,12 @@ class CustomerService extends Service {
       return this.importOne(customer);
     }
     const user = await this.getUserByCustomer(customer);
+    ctx.logger.info('request customer %j', user);
     return ctx
       .curl(`${APIS.UPDATE_CUSTOMER}?accesstoken=${access_token}`, {
         method: 'POST',
         data: {
-          vid: 6015252206894,
+          vid: SHOP_INFO.VID,
           wid,
           ...user,
         },
