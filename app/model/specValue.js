@@ -1,11 +1,11 @@
 /*
  * :file description:
- * :name: /cpro-cs/app/model/specValus.js
+ * :name: /cpro-cs/app/model/specValue.js
  * :author: 李彦辉Jacky
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-24 23:27:23
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-24 23:28:45
+ * :date last edited: 2022-06-26 15:48:44
  */
 'use strict';
 

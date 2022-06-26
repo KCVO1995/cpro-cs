@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-24 22:45:17
+ * :date last edited: 2022-06-26 15:46:08
  */
 'use strict';
 const Service = require('egg').Service;
@@ -66,6 +66,7 @@ class ProductService extends Service {
     return Promise.all(urls.map(u => this.getWFileUrl(u)));
   }
   async getGoodByProduct(product) {
+    const { ctx } = this;
     const good = {
       deductStockType: 2,
       categoryId: 43,
@@ -95,7 +96,9 @@ class ProductService extends Service {
       // wid: '', // TODO,
     };
     if (product.vendor) {
-      good.brandId = 'TODO';
+      const brandId = await ctx.service.vendor.getBrandId(product.vendor);
+      console.log(brandId, '--------brandId--------');
+      good.brandId = brandId;
     }
     if (product.image && product.image.src) {
       good.defaultImageUrl = await this.getWFileUrl(product.image.src);
