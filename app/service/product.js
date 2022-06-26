@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-26 16:37:55
+ * :date last edited: 2022-06-26 17:40:56
  */
 'use strict';
 const Service = require('egg').Service;
@@ -50,30 +50,35 @@ class ProductService extends Service {
       good.brandId = brandId;
     }
     if (product.image && product.image.src) {
-      good.defaultImageUrl = await this.service.image.getWFileUrl(product.image.src);
+      good.defaultImageUrl = await ctx.service.image.getWFileUrl(product.image.src);
     }
     if (product.images.length > 0) {
-      good.goodsImageUrl = await this.service.image.getWFileUrls(product.images.map(item => item.src));
+      good.goodsImageUrl = await ctx.service.image.getWFileUrls(product.images.map(item => item.src));
     }
     if (product.options.length > 0) {
-      good.specInfoList = product.options.map(option => ({
-        specId: option.id,
-        specName: option.name,
-        specImgEnable: false,
-        skuSpecValueList: option.values.map((item, index) => ({
-          specValueName: item,
-          imageUrl: '',
-          specValueId: this.getSpecValueId(option.id, index),
-          sort: index,
-          isOpenSizeRecommend: false,
-        })),
-      }));
+      good.specInfoList = product.options.map(async option => {
+        const specId = await ctx.service.spec.getSpecId(option);
+        return {
+          specId,
+          specName: option.name,
+          specImgEnable: false,
+          skuSpecValueList: option.values.map(async (item, index) => {
+            const specValueId = await ctx.service.spec.getSpecValueId(specId, item);
+            return {
+              specValueName: item,
+              imageUrl: '',
+              specValueId,
+              sort: index,
+              isOpenSizeRecommend: false,
+            };
+          }),
+        };
+      });
     }
     if (product.variants.length > 0) {
       good.skuList = product.variants.map(item => {
-        const skuSpecValueList = []
-
-        ;[ 1, 2, 3 ].forEach(i => {
+        const skuSpecValueList = [];
+        [ 1, 2, 3 ].forEach(i => {
           const key = `option_${i}`;
           if (item[key]) {
             const option = product.options[i - 1];

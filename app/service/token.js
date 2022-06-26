@@ -5,11 +5,11 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 19:01:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-23 17:44:00
+ * :date last edited: 2022-06-26 17:16:44
  */
 'use strict';
 const Service = require('egg').Service;
-const { SHOP_INFO } = require('../constants/index');
+const { SHOP_INFO, APIS } = require('../constants/index');
 
 class TokenService extends Service {
   async get(cache = true) {
@@ -20,7 +20,7 @@ class TokenService extends Service {
       return token.access_token;
     }
     const res = await this.ctx.curl(
-      `https://dopen.weimob.com/fuwu/b/oauth2/token?grant_type=client_credentials&client_id=${SHOP_INFO.CLIENT_ID}&client_secret=${SHOP_INFO.CLIENT_SECRET}&shop_id=${SHOP_INFO.SHOP_ID}&shop_type=${SHOP_INFO.SHOP_TYPE}`,
+      `${APIS.GET_TOKEN}?grant_type=client_credentials&client_id=${SHOP_INFO.CLIENT_ID}&client_secret=${SHOP_INFO.CLIENT_SECRET}&shop_id=${SHOP_INFO.SHOP_ID}&shop_type=${SHOP_INFO.SHOP_TYPE}`,
       {
         method: 'POST',
         dataType: 'json',
