@@ -5,65 +5,15 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-26 15:46:08
+ * :date last edited: 2022-06-26 16:37:55
  */
 'use strict';
 const Service = require('egg').Service;
-const https = require('https'); // or 'https' for https:// URLs
-const fs = require('fs');
-const path = require('path');
-
 const { APIS, SHOP_INFO } = require('../constants/index');
 
 class ProductService extends Service {
   getSpecValueId(optionId, index) {
     return optionId + optionId + index + 1;
-  }
-  async getWFileUrl(url) {
-    const { ctx } = this;
-    const access_token = await ctx.service.token.get();
-    const fileName = url.match(/image\/(\S*)\/s/)[1];
-    const pathName = path.resolve('tempFile/file.jpeg');
-
-    const file = fs.createWriteStream(pathName);
-    return new Promise((resolve, reject) => {
-      const request = https.get(
-        url,
-        function(response) {
-          response.pipe(file);
-          file.on('finish', () => {
-            file.close(() => {
-              resolve();
-            });
-          });
-          request.on('error', () => {
-            fs.unlink(pathName, () => { reject(new Error('上传失败')); });
-          });
-          file.on('error', () => {
-            // Handle errors
-            fs.unlink(pathName, () => { reject(new Error('上传失败')); });
-          });
-        }
-      );
-    }).then(() => {
-      return ctx.curl(`${APIS.UPLOAD_FILE}?accesstoken=${access_token}`, {
-        method: 'POST',
-        dataType: 'json',
-        files: pathName,
-        data: {
-          name: fileName,
-        },
-      });
-    }).then(res => {
-      const { code, data } = res.data;
-      if (code.errcode === 0 && data.urlInfo.length) {
-        return data.urlInfo[0].url;
-      }
-      return undefined;
-    });
-  }
-  async getWFileUrls(urls) {
-    return Promise.all(urls.map(u => this.getWFileUrl(u)));
   }
   async getGoodByProduct(product) {
     const { ctx } = this;
@@ -93,18 +43,17 @@ class ProductService extends Service {
       skuList: [],
       subGoodsType: 101,
       title: product.name,
-      // wid: '', // TODO,
     };
+    // TODO 分类
     if (product.vendor) {
       const brandId = await ctx.service.vendor.getBrandId(product.vendor);
-      console.log(brandId, '--------brandId--------');
       good.brandId = brandId;
     }
     if (product.image && product.image.src) {
-      good.defaultImageUrl = await this.getWFileUrl(product.image.src);
+      good.defaultImageUrl = await this.service.image.getWFileUrl(product.image.src);
     }
     if (product.images.length > 0) {
-      good.goodsImageUrl = await this.getWFileUrls(product.images.map(item => item.src));
+      good.goodsImageUrl = await this.service.image.getWFileUrls(product.images.map(item => item.src));
     }
     if (product.options.length > 0) {
       good.specInfoList = product.options.map(option => ({
