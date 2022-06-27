@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 14:59:45
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-23 20:09:20
+ * :date last edited: 2022-06-27 15:49:00
  */
 'use strict';
 
@@ -27,6 +27,19 @@ module.exports = app => {
       updatedAt: 'updated_at',
     }
   );
+
+
+  Category.getWidByYhsdId = async function(yhsd_category_id) {
+    const c = await this.findOne({
+      where: {
+        yhsd_category_id,
+      },
+    });
+    if (c && c.dataValues && c.dataValues.w_category_id) {
+      return c.dataValues.w_category_id;
+    }
+    return undefined;
+  };
 
   return Category;
 

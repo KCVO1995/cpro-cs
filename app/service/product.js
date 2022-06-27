@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-27 15:26:39
+ * :date last edited: 2022-06-27 16:02:23
  */
 'use strict';
 const Service = require('egg').Service;
@@ -114,10 +114,15 @@ class ProductService extends Service {
       subGoodsType: 101,
       title: product.name,
     };
-    // TODO 分类
     if (product.vendor) {
       const brandId = await ctx.service.vendor.getBrandId(product.vendor);
       good.brandId = brandId;
+    }
+    if (product.types) {
+      const goodsClassifyIdList = await ctx.service.category.getCategoryIds(
+        product.types
+      );
+      good.goodsClassifyIdList = goodsClassifyIdList;
     }
     if (product.image && product.image.src) {
       good.defaultImageUrl = await ctx.service.image.getWFileUrl(
