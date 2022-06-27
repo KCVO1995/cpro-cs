@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-24 23:27:23
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-26 17:33:16
+ * :date last edited: 2022-06-27 15:01:13
  */
 'use strict';
 
@@ -28,6 +28,19 @@ module.exports = app => {
       updatedAt: 'updated_at',
     }
   );
+
+  SpecValue.getItemByYhsdName = async function(yhsd_option_value_name) {
+    const c = await this.findOne({
+      where: {
+        yhsd_option_value_name,
+      },
+      include: [{ model: app.model.Spec }],
+    });
+    if (c && c.dataValues) {
+      return c.dataValues;
+    }
+    return undefined;
+  };
 
   SpecValue.getWidByYhsdName = async function(yhsd_option_value_name) {
     const c = await this.findOne({

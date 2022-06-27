@@ -5,15 +5,85 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-26 17:40:56
+ * :date last edited: 2022-06-27 15:26:39
  */
 'use strict';
 const Service = require('egg').Service;
+const async = require('async');
 const { APIS, SHOP_INFO } = require('../constants/index');
 
 class ProductService extends Service {
-  getSpecValueId(optionId, index) {
-    return optionId + optionId + index + 1;
+  async getSpecInfoList(options) {
+    const { ctx } = this;
+    return async
+      .map(options, (option, cb) => {
+        ctx.service.spec
+          .getSpecId(option)
+          .then(specId => {
+            let index = 0;
+
+            return async.map(option.values, (optionValue, cb2) => {
+              ctx.service.spec
+                .getSpecValueId(specId, optionValue)
+                .then(specValueId => {
+                  index += 1;
+                  cb2(null, {
+                    specValueName: optionValue,
+                    imageUrl: '',
+                    specValueId,
+                    sort: index,
+                    isOpenSizeRecommend: false,
+                  });
+                });
+            }).then(skuSpecValueList => ({ skuSpecValueList, specId }));
+          })
+          .then(({ skuSpecValueList, specId }) => {
+            cb(null, {
+              specId,
+              specName: option.name,
+              specImgEnable: false,
+              skuSpecValueList,
+            });
+          });
+      })
+      .catch(e => console.log(e, 'error'));
+  }
+  async getSkuList(variants) {
+    const { ctx } = this;
+    return async.map(variants, (variant, cb) => {
+      async
+        .map([ 1, 2, 3 ], (i, cb2) => {
+          const key = `option_${i}`;
+          if (variant[key]) {
+            ctx.model.SpecValue.getItemByYhsdName(variant[key]).then(
+              specValueItem => {
+                if (specValueItem.w_spec_value_id) {
+                  if (specValueItem.spec.dataValues) {
+                    cb2(null, {
+                      specId: specValueItem.spec.dataValues.w_spec_id,
+                      specValueId: specValueItem.w_spec_value_id,
+                    });
+                  } else {
+                    cb2(null, null);
+                  }
+                } else {
+                  cb2(null, null);
+                }
+              }
+            );
+          } else {
+            cb2(null, null);
+          }
+        })
+        .then(skuSpecValueList => {
+          cb(null, {
+            skuStockNum: variant.stock,
+            outerSkuCode: variant.id,
+            salePrice: variant.price,
+            skuSpecValueList: skuSpecValueList.filter(item => !!item),
+          });
+        });
+    });
   }
   async getGoodByProduct(product) {
     const { ctx } = this;
@@ -50,54 +120,20 @@ class ProductService extends Service {
       good.brandId = brandId;
     }
     if (product.image && product.image.src) {
-      good.defaultImageUrl = await ctx.service.image.getWFileUrl(product.image.src);
+      good.defaultImageUrl = await ctx.service.image.getWFileUrl(
+        product.image.src
+      );
     }
     if (product.images.length > 0) {
-      good.goodsImageUrl = await ctx.service.image.getWFileUrls(product.images.map(item => item.src));
+      good.goodsImageUrl = await ctx.service.image.getWFileUrls(
+        product.images.map(item => item.src)
+      );
     }
     if (product.options.length > 0) {
-      good.specInfoList = product.options.map(async option => {
-        const specId = await ctx.service.spec.getSpecId(option);
-        return {
-          specId,
-          specName: option.name,
-          specImgEnable: false,
-          skuSpecValueList: option.values.map(async (item, index) => {
-            const specValueId = await ctx.service.spec.getSpecValueId(specId, item);
-            return {
-              specValueName: item,
-              imageUrl: '',
-              specValueId,
-              sort: index,
-              isOpenSizeRecommend: false,
-            };
-          }),
-        };
-      });
+      good.specInfoList = await this.getSpecInfoList(product.options);
     }
     if (product.variants.length > 0) {
-      good.skuList = product.variants.map(item => {
-        const skuSpecValueList = [];
-        [ 1, 2, 3 ].forEach(i => {
-          const key = `option_${i}`;
-          if (item[key]) {
-            const option = product.options[i - 1];
-            const index = option.values.findIndex(v => v === item[key]);
-            if (index < 0) return;
-
-            skuSpecValueList.push({
-              specId: option.id,
-              specValueId: this.getSpecValueId(option.id, index),
-            });
-          }
-        });
-        return {
-          skuStockNum: item.stock,
-          outerSkuCode: item.id,
-          salePrice: item.price,
-          skuSpecValueList,
-        };
-      });
+      good.skuList = await this.getSkuList(product.variants);
     }
     return good;
   }
