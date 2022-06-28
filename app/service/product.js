@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-28 16:53:15
+ * :date last edited: 2022-06-28 20:51:56
  */
 'use strict';
 const Service = require('egg').Service;
@@ -149,7 +149,6 @@ class ProductService extends Service {
       w_product_id: data.goodsId,
       yhsd_product_id: product.id,
     }).then(res => {
-      console.log(res, 'res');
       const { dataValues } = res;
       if (data.skuList.length > 0) { // sku
         data.skuList.forEach((sku, index) => {
@@ -162,7 +161,7 @@ class ProductService extends Service {
       }
     });
   }
-  async afterUpdateOne(data, product) { // TODO unknown orderId ?
+  async afterUpdateOne(data, product) {
     const { ctx } = this;
 
     const productId = await ctx.model.Product.getIdByYhsdId(product.id);
@@ -224,8 +223,9 @@ class ProductService extends Service {
           const { code, data } = res.data;
           if (code.errcode === '0') {
             this.afterImportOne(data, product);
+          } else {
+            return Promise.reject(res.data);
           }
-          return Promise.reject(res.data);
         },
         e => {
           ctx.logger.error('weimob import customer error %j', e);
@@ -257,8 +257,9 @@ class ProductService extends Service {
           const { code, data } = res.data;
           if (code.errcode === '0') {
             this.afterUpdateOne(data, product);
+          } else {
+            return Promise.reject(res.data);
           }
-          return Promise.reject(res.data);
         },
         e => {
           ctx.logger.error('weimob update customer error %j', e);

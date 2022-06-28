@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:05:35
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-28 16:45:25
+ * :date last edited: 2022-06-28 20:50:35
  */
 'use strict';
 
@@ -30,7 +30,6 @@ module.exports = app => {
   );
 
   SkuId.getProductSkuList = async function(product_id) {
-    console.log('fuck');
     const c = await this.findAll({
       where: {
         product_id,

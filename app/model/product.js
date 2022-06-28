@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 14:59:45
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-28 16:07:45
+ * :date last edited: 2022-06-28 20:50:15
  */
 'use strict';
 
@@ -51,10 +51,10 @@ module.exports = app => {
     }
     return undefined;
   };
-  
+
 
   Product.associate = function() {
-    app.model.Order.hasMany(app.model.SkuId);
+    app.model.Product.hasMany(app.model.SkuId);
   };
 
   return Product;
