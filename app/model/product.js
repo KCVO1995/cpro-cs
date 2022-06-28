@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 14:59:45
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-23 20:10:31
+ * :date last edited: 2022-06-28 16:07:45
  */
 'use strict';
 
@@ -27,6 +27,31 @@ module.exports = app => {
       updatedAt: 'updated_at',
     }
   );
+
+  Product.getWidByYhsdId = async function(yhsd_product_id) {
+    const c = await this.findOne({
+      where: {
+        yhsd_product_id,
+      },
+    });
+    if (c && c.dataValues && c.dataValues.w_product_id) {
+      return c.dataValues.w_product_id;
+    }
+    return undefined;
+  };
+
+  Product.getIdByYhsdId = async function(yhsd_product_id) {
+    const c = await this.findOne({
+      where: {
+        yhsd_product_id,
+      },
+    });
+    if (c && c.dataValues && c.dataValues.id) {
+      return c.dataValues.id;
+    }
+    return undefined;
+  };
+  
 
   Product.associate = function() {
     app.model.Order.hasMany(app.model.SkuId);

@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-26 16:36:48
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-26 16:38:43
+ * :date last edited: 2022-06-28 15:40:54
  */
 'use strict';
 const Service = require('egg').Service;
@@ -22,7 +22,7 @@ class ImageService extends Service {
     if (wUrl) return wUrl;
     const access_token = await ctx.service.token.get();
     const fileName = url.match(/image\/(\S*)\/s/)[1];
-    const pathName = path.resolve('tempFile/file.jpeg');
+    const pathName = path.resolve(`tempFile/${fileName}.jpeg`);
 
     const file = fs.createWriteStream(pathName);
     return new Promise((resolve, reject) => {
@@ -54,6 +54,9 @@ class ImageService extends Service {
         },
       });
     }).then(res => {
+      fs.unlink(pathName, err => {
+        if (err) console.log(err, '删除缓存图片失败');
+      }); // 文件上传完毕后删除
       const { code, data } = res.data;
       if (code.errcode === 0 && data.urlInfo.length) {
         const w_url = data.urlInfo[0].url;

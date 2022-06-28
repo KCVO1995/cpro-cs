@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:13:36
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-23 20:14:16
+ * :date last edited: 2022-06-28 16:38:14
  */
 /*
  * :file description:
@@ -44,7 +44,7 @@ class ProductController extends Controller {
     const { ctx } = this;
     ctx.logger.info('yshd update product %j', ctx.request.body);
     try {
-      await ctx.service.customer.updateOne(ctx.request.body);
+      await ctx.service.product.updateOne(ctx.request.body);
       ctx.status = 200;
     } catch (e) {
       ctx.status = 400;

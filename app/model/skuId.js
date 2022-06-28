@@ -5,25 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:05:35
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-23 20:10:51
- */
-/*
- * :file description:
- * :name: /cpro-cs/app/model/product.js
- * :author: 李彦辉Jacky
- * :copyright: (c) 2022, Tungee
- * :date created: 2022-06-23 20:03:06
- * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-23 20:04:51
- */
-/*
- * :file description:
- * :name: /cpro-cs/app/model/customer.js
- * :author: 李彦辉Jacky
- * :copyright: (c) 2022, Tungee
- * :date created: 2022-06-19 14:59:45
- * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-22 22:29:27
+ * :date last edited: 2022-06-28 16:45:25
  */
 'use strict';
 
@@ -46,6 +28,17 @@ module.exports = app => {
       updatedAt: 'updated_at',
     }
   );
+
+  SkuId.getProductSkuList = async function(product_id) {
+    console.log('fuck');
+    const c = await this.findAll({
+      where: {
+        product_id,
+      },
+    });
+    return c.length > 0 ? c : [];
+  };
+
 
   SkuId.associate = function() {
     app.model.SkuId.belongsTo(app.model.Product, {

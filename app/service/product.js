@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-27 16:02:23
+ * :date last edited: 2022-06-28 16:53:15
  */
 'use strict';
 const Service = require('egg').Service;
@@ -90,7 +90,7 @@ class ProductService extends Service {
     const good = {
       deductStockType: 2,
       categoryId: 43,
-      goodsDesc: product.short_desc,
+      subTitle: product.short_desc,
       goodsType: 1,
       goodsTemplateId: 1192643230695,
       isCanSell: true,
@@ -105,7 +105,7 @@ class ProductService extends Service {
             deliveryId: 10001295124,
             deliveryNodeShipId: 2907478,
             deliveryType: 1,
-            templateId: 10000997063,
+            templateId: 10000985155,
           },
         ],
       },
@@ -113,6 +113,7 @@ class ProductService extends Service {
       skuList: [],
       subGoodsType: 101,
       title: product.name,
+      wid: 10031336493,
     };
     if (product.vendor) {
       const brandId = await ctx.service.vendor.getBrandId(product.vendor);
@@ -142,6 +143,64 @@ class ProductService extends Service {
     }
     return good;
   }
+  afterImportOne(data, product) {
+    const { ctx } = this;
+    ctx.model.Product.create({
+      w_product_id: data.goodsId,
+      yhsd_product_id: product.id,
+    }).then(res => {
+      console.log(res, 'res');
+      const { dataValues } = res;
+      if (data.skuList.length > 0) { // sku
+        data.skuList.forEach((sku, index) => {
+          ctx.model.SkuId.create({
+            w_sku_id: sku.skuId,
+            yhsd_sku_id: product.variants[index].id,
+            product_id: dataValues.id,
+          });
+        });
+      }
+    });
+  }
+  async afterUpdateOne(data, product) { // TODO unknown orderId ?
+    const { ctx } = this;
+
+    const productId = await ctx.model.Product.getIdByYhsdId(product.id);
+    const productSkuList = await ctx.model.SkuId.getProductSkuList(productId);
+    const dbSkuList = productSkuList.map(item => item.dataValues);
+
+    data.skuList.forEach((sku, index) => { // 微盟返回的 skuList 在原有list中找不到，需要新增
+      const wSkuId = sku.skuId;
+      const yhsdSkuId = product.variants[index].id;
+      const _sku = dbSkuList.find(
+        item => item.w_sku_id === wSkuId && item.yhsd_sku_id === yhsdSkuId
+      );
+      if (_sku) {
+        ctx.model.SkuId.create({
+          w_sku_id: sku.skuId,
+          yhsd_sku_id: product.variants[index].id,
+          product_id: productId,
+        });
+      }
+    });
+
+    // 已被弃用的 skuList
+    const wSkuIdList = data.skuList.map(item => item.skuId);
+    const yhsdSkuIdList = product.variants.map(item => item.id);
+    const unMatchSkuIdList = dbSkuList.filter(
+      item =>
+        !yhsdSkuIdList.includes(item.yhsd_sku_id) ||
+        !wSkuIdList.includes(item.w_sku_id)
+    );
+    unMatchSkuIdList.forEach(item => {
+      ctx.model.SkuId.destroy({
+        where: {
+          id: item.id,
+        },
+        truncate: true,
+      });
+    });
+  }
   async importOne(product) {
     const { ctx } = this;
     const access_token = await ctx.service.token.get();
@@ -154,7 +213,6 @@ class ProductService extends Service {
           basicInfo: {
             vid: SHOP_INFO.VID,
           },
-          categoryId: 10003280149212,
           ...good,
         },
         contentType: 'json',
@@ -163,30 +221,47 @@ class ProductService extends Service {
       .then(
         res => {
           ctx.logger.info('weimob import product %j', res.data);
-          // const { code, data } = res.data;
-          // if (
-          //   data.errorList.length > 0 &&
-          //   data.errorList[0].errorMessage === '该客户已存在'
-          // ) {
-          //   const errorList = data.errorList;
-          //   if (errorList.length > 0 && errorList[0].wid) {
-          //     this.afterImportOne(customer, errorList[0].wid);
-          //     return 'ok';
-          //   }
-          //   return Promise.reject(res.data);
-          // }
-          // if (code.errcode === '0') {
-          //   const successList = data.successList;
-          //   if (successList.length > 0 && successList[0].wid) {
-          //     this.afterImportOne(customer, successList[0].wid);
-          //     return 'ok';
-          //   }
-          //   return Promise.reject(res.data);
-          // }
-          // return Promise.reject(res.data);
+          const { code, data } = res.data;
+          if (code.errcode === '0') {
+            this.afterImportOne(data, product);
+          }
+          return Promise.reject(res.data);
         },
         e => {
           ctx.logger.error('weimob import customer error %j', e);
+        }
+      );
+  }
+  async updateOne(product) {
+    const { ctx } = this;
+    const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
+    if (!wProductId) return this.importOne(product);
+    const access_token = await ctx.service.token.get();
+    const good = await this.getGoodByProduct(product);
+    return ctx
+      .curl(`${APIS.UPDATE_PRODUCT}?accesstoken=${access_token}`, {
+        method: 'POST',
+        data: {
+          basicInfo: {
+            vid: SHOP_INFO.VID,
+          },
+          goodsId: wProductId,
+          ...good,
+        },
+        contentType: 'json',
+        dataType: 'json',
+      })
+      .then(
+        res => {
+          ctx.logger.info('weimob update product %j', res.data);
+          const { code, data } = res.data;
+          if (code.errcode === '0') {
+            this.afterUpdateOne(data, product);
+          }
+          return Promise.reject(res.data);
+        },
+        e => {
+          ctx.logger.error('weimob update customer error %j', e);
         }
       );
   }

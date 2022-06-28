@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-24 16:56:30
+ * :date last edited: 2022-06-28 16:05:16
  */
 'use strict';
 const Service = require('egg').Service;
@@ -115,55 +115,6 @@ class CustomerService extends Service {
           ctx.logger.error('weimob update customer error %j', e);
         }
       );
-  }
-  async importOneTest() {
-    const { ctx } = this;
-    const access_token = await ctx.service.token.get();
-    const res = await ctx.curl(
-      `${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`,
-      {
-        method: 'POST',
-        data: {
-          importType: 1,
-          userList: [
-            {
-              birthday: 1533225600000,
-              income: '1',
-              customCardNo: '82110094694106094',
-              education: '1',
-              gender: 1,
-              city: '上海市',
-              openId: 'ooNcd1AnHzN7w-oASQVYL6w0iDqk',
-              industry: '1',
-              point: 12,
-              extMap: {
-                value: '红色',
-                key: '喜欢的颜色',
-              },
-              regionCode: '784',
-              province: '上海市',
-              balance: 12,
-              appId: 'wx651a38d04a8788d8',
-              area: '宝山区',
-              unionId: 'ooNcd1AnHzN7w-oASQVYL6w0iDqk',
-              address: '中成智谷',
-              totalBalance: 25,
-              levelName: '等级一',
-              userName: '小明',
-              identityCardNum: '130424199208027431',
-              appChannel: 1,
-              userKey: '1',
-              totalPoint: 25,
-              phone: '17344429466',
-              growth: 23,
-              hobby: '1',
-            },
-          ],
-        },
-        contentType: 'json',
-        dataType: 'json',
-      }
-    );
   }
 }
 
