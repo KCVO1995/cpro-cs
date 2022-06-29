@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-28 20:51:56
+ * :date last edited: 2022-06-29 22:24:25
  */
 'use strict';
 const Service = require('egg').Service;
@@ -228,7 +228,7 @@ class ProductService extends Service {
           }
         },
         e => {
-          ctx.logger.error('weimob import customer error %j', e);
+          ctx.logger.error('weimob import product error %j', e);
         }
       );
   }
@@ -262,7 +262,47 @@ class ProductService extends Service {
           }
         },
         e => {
-          ctx.logger.error('weimob update customer error %j', e);
+          ctx.logger.error('weimob update product error %j', e);
+        }
+      );
+  }
+  afterDeleteOne(wProductId) {
+    const { ctx } = this;
+    ctx.model.Product.destroy({
+      where: {
+        w_product_id: wProductId,
+      },
+    });
+  }
+  async deleteOne(product) {
+    const { ctx } = this;
+    const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
+    if (!wProductId) return 'OK';
+    const access_token = await ctx.service.token.get();
+    return ctx
+      .curl(`${APIS.DELETE_PRODUCT}?accesstoken=${access_token}`, {
+        method: 'POST',
+        data: {
+          basicInfo: {
+            vid: SHOP_INFO.VID,
+          },
+          goodsIdList: [ wProductId ],
+        },
+        contentType: 'json',
+        dataType: 'json',
+      })
+      .then(
+        res => {
+          ctx.logger.info('weimob delete product %j', res.data);
+          const { code } = res.data;
+          if (code.errcode === '0') {
+            this.afterDeleteOne(wProductId);
+          } else {
+            return Promise.reject(res.data);
+          }
+        },
+        e => {
+          ctx.logger.error('weimob delete product error %j', e);
         }
       );
   }

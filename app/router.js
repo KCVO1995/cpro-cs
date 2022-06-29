@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-23 23:15:15
+ * :date last edited: 2022-06-29 22:28:46
  */
 'use strict';
 
@@ -23,7 +23,7 @@ module.exports = app => {
   // webhook 更新商品
   router.post('/product/update', controller.product.update);
   // webhook 删除商品
-  // router.post('/product/delete', controller.product.delete);
+  router.post('/product/delete', controller.product.delete);
   // webhook 创建订单
   // router.post('/order/create', controller.customer.update);
   // // webhook 更新订单

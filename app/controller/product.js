@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:13:36
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-29 22:11:59
+ * :date last edited: 2022-06-29 22:13:09
  */
 /*
  * :file description:
@@ -45,6 +45,16 @@ class ProductController extends Controller {
     // ctx.logger.info('yshd update product %j', ctx.request.body);
     try {
       await ctx.service.product.updateOne(ctx.request.body);
+      ctx.status = 200;
+    } catch (e) {
+      ctx.status = 400;
+    }
+  }
+  async delete() {
+    const { ctx } = this;
+    // ctx.logger.info('yshd update product %j', ctx.request.body);
+    try {
+      await ctx.service.product.deleteOne(ctx.request.body);
       ctx.status = 200;
     } catch (e) {
       ctx.status = 400;
