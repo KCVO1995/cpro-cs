@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-27 15:44:13
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-27 15:58:11
+ * :date last edited: 2022-06-29 21:59:00
  */
 'use strict';
 const Service = require('egg').Service;
@@ -41,7 +41,7 @@ class CategoryService extends Service {
       .curl(`${APIS.IMPORT_CATEGORY}?accesstoken=${access_token}`, {
         method: 'POST',
         data: {
-          name,
+          name: name.substr(0, 20),
           basicInfo: {
             vid: SHOP_INFO.VID,
           },

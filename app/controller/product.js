@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:13:36
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-28 16:38:14
+ * :date last edited: 2022-06-29 22:11:59
  */
 /*
  * :file description:
@@ -32,7 +32,7 @@ const Controller = require('egg').Controller;
 class ProductController extends Controller {
   async create() {
     const { ctx } = this;
-    ctx.logger.info('yshd create product %j', ctx.request.body);
+    // ctx.logger.info('yshd create product %j', ctx.request.body);
     try {
       await ctx.service.product.importOne(ctx.request.body);
       ctx.status = 200;
@@ -42,7 +42,7 @@ class ProductController extends Controller {
   }
   async update() {
     const { ctx } = this;
-    ctx.logger.info('yshd update product %j', ctx.request.body);
+    // ctx.logger.info('yshd update product %j', ctx.request.body);
     try {
       await ctx.service.product.updateOne(ctx.request.body);
       ctx.status = 200;
