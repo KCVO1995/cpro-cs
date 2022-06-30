@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 20:54:32
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-19 20:56:35
+ * :date last edited: 2022-06-30 10:16:37
  */
 'use strict';
 // app.js
@@ -42,6 +42,20 @@ class AppBootHook {
     // 此时可以从 app.server 拿到 server 的实例
     const ctx = await this.app.createAnonymousContext();
     await ctx.service.token.get(false);
+
+    this.app.httpclient.on('request', req => {
+      req.url; // 请求 url
+      req.ctx; // 是发起这次请求的当前上下文
+
+      ctx.logger.info('http request %j', `请求url: ${req.url}`, `请求ctx: ${req.ctx}`);
+    });
+    this.app.httpclient.on('response', result => {
+      result.res.status;
+      result.ctx; // 是发起这次请求的当前上下文
+      result.req; // 对应的 req 对象，即 request 事件里面那个 req
+
+      ctx.logger.info('http response %j', `请求响应: ${result.req}`);
+    });
   }
 }
 

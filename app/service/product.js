@@ -5,13 +5,14 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-29 22:24:25
+ * :date last edited: 2022-06-30 10:10:40
  */
 'use strict';
 const Service = require('egg').Service;
 const async = require('async');
 const { APIS, SHOP_INFO } = require('../constants/index');
 
+// TODO sku 规格数量大于商品规格数量
 class ProductService extends Service {
   async getSpecInfoList(options) {
     const { ctx } = this;
@@ -90,7 +91,7 @@ class ProductService extends Service {
     const good = {
       deductStockType: 2,
       categoryId: 43,
-      subTitle: product.short_desc,
+      subTitle: product.short_desc.substr(0, 60),
       goodsType: 1,
       goodsTemplateId: 1192643230695,
       isCanSell: true,
@@ -112,7 +113,7 @@ class ProductService extends Service {
       specInfoList: [],
       skuList: [],
       subGoodsType: 101,
-      title: product.name,
+      title: product.name.substr(0, 60),
       wid: 10031336493,
     };
     if (product.vendor) {
@@ -174,7 +175,7 @@ class ProductService extends Service {
       const _sku = dbSkuList.find(
         item => item.w_sku_id === wSkuId && item.yhsd_sku_id === yhsdSkuId
       );
-      if (_sku) {
+      if (!_sku) {
         ctx.model.SkuId.create({
           w_sku_id: sku.skuId,
           yhsd_sku_id: product.variants[index].id,
@@ -188,8 +189,9 @@ class ProductService extends Service {
     const yhsdSkuIdList = product.variants.map(item => item.id);
     const unMatchSkuIdList = dbSkuList.filter(
       item =>
-        !yhsdSkuIdList.includes(item.yhsd_sku_id) ||
-        !wSkuIdList.includes(item.w_sku_id)
+        item.product_id === productId && (
+          !yhsdSkuIdList.includes(item.yhsd_sku_id) ||
+        !wSkuIdList.includes(item.w_sku_id))
     );
     unMatchSkuIdList.forEach(item => {
       ctx.model.SkuId.destroy({
@@ -204,7 +206,7 @@ class ProductService extends Service {
     const { ctx } = this;
     const access_token = await ctx.service.token.get();
     const good = await this.getGoodByProduct(product);
-    ctx.logger.info('weimob import product %j', good);
+    ctx.logger.info('weimob import product request %j', good);
     return ctx
       .curl(`${APIS.IMPORT_PRODUCT}?accesstoken=${access_token}`, {
         method: 'POST',

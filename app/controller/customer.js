@@ -5,19 +5,11 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-21 21:34:38
- */
-/*
- * :file description:
- * :name: /cpro-cs/app/controller/customer.js
- * :author: 李彦辉Jacky
- * :copyright: (c) 2022, Tungee
- * :date created: 2022-06-18 15:07:42
- * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-18 17:31:18
+ * :date last edited: 2022-06-30 10:17:57
  */
 'use strict';
 
+// TODO 名字没同步
 const Controller = require('egg').Controller;
 
 class CustomerController extends Controller {
@@ -27,7 +19,6 @@ class CustomerController extends Controller {
   }
   async create() {
     const { ctx } = this;
-    ctx.logger.info('yshd create customer %j', ctx.request.body);
     try {
       await ctx.service.customer.importOne(ctx.request.body);
       ctx.status = 200;
@@ -38,7 +29,6 @@ class CustomerController extends Controller {
   }
   async update() {
     const { ctx } = this;
-    ctx.logger.info('yshd update customer %j', ctx.request.body);
     try {
       await ctx.service.customer.updateOne(ctx.request.body);
       ctx.status = 200;

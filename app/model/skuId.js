@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:05:35
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-28 20:50:35
+ * :date last edited: 2022-06-29 22:53:22
  */
 'use strict';
 
@@ -36,6 +36,18 @@ module.exports = app => {
       },
     });
     return c.length > 0 ? c : [];
+  };
+
+  SkuId.getWidByYhsdId = async function(yhsd_sku_id) {
+    const c = await this.findOne({
+      where: {
+        yhsd_sku_id,
+      },
+    });
+    if (c && c.dataValues && c.dataValues.w_sku_id) {
+      return c.dataValues.w_sku_id;
+    }
+    return undefined;
   };
 
 
