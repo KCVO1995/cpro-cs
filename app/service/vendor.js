@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-26 14:59:00
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-26 16:03:31
+ * :date last edited: 2022-06-30 10:19:46
  */
 'use strict';
 const Service = require('egg').Service;
@@ -45,7 +45,6 @@ class VendorService extends Service {
         this.saveOne(id, data.id);
         return data.id;
       }
-      ctx.logger.error('weimob import brand error %j', res.data);
       return undefined;
     });
   }

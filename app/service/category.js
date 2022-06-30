@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-27 15:44:13
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-29 22:54:25
+ * :date last edited: 2022-06-30 10:19:32
  */
 'use strict';
 const Service = require('egg').Service;
@@ -55,7 +55,6 @@ class CategoryService extends Service {
           this.saveOne(id, data.id);
           return data.id;
         }
-        ctx.logger.error('weimob import category error %j', res.data);
         return undefined;
       });
   }

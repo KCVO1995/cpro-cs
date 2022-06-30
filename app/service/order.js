@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-29 23:43:59
+ * :date last edited: 2022-06-30 10:21:23
  */
 'use strict';
 // app/service/user.js
@@ -166,17 +166,12 @@ class OrderService extends Service {
       })
       .then(
         res => {
-          ctx.logger.info('weimob import order %j', res.data);
           const { code } = res;
           if (code.errcode === '0') {
             return 'ok';
           }
           return Promise.reject(res);
-        },
-        e => {
-          ctx.logger.error('weimob import order error %j', e);
-        }
-      );
+        });
   }
 }
 

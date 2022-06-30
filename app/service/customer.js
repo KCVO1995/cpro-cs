@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-28 16:05:16
+ * :date last edited: 2022-06-30 10:19:37
  */
 'use strict';
 const Service = require('egg').Service;
@@ -39,7 +39,6 @@ class CustomerService extends Service {
     const { ctx } = this;
     const access_token = await ctx.service.token.get();
     const user = this.getUserByCustomer(customer);
-    ctx.logger.info('request customer %j', user);
     return ctx
       .curl(`${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`, {
         method: 'POST',
@@ -52,7 +51,6 @@ class CustomerService extends Service {
       })
       .then(
         res => {
-          ctx.logger.info('weimob import customer %j', res.data);
           const { code, data } = res.data;
           if (
             data.errorList.length > 0 &&
@@ -74,9 +72,6 @@ class CustomerService extends Service {
             return Promise.reject(res.data);
           }
           return Promise.reject(res.data);
-        },
-        e => {
-          ctx.logger.error('weimob import customer error %j', e);
         }
       );
   }
@@ -88,7 +83,6 @@ class CustomerService extends Service {
       return this.importOne(customer);
     }
     const user = await this.getUserByCustomer(customer);
-    ctx.logger.info('request customer %j', user);
     return ctx
       .curl(`${APIS.UPDATE_CUSTOMER}?accesstoken=${access_token}`, {
         method: 'POST',
@@ -102,7 +96,6 @@ class CustomerService extends Service {
       })
       .then(
         res => {
-          ctx.logger.info('weimob update customer %j', res.data);
           const { code } = res.data;
           if (code.errcode === '0') return 'ok';
           if (code.errcode === '001460020011004') {
@@ -112,7 +105,6 @@ class CustomerService extends Service {
           return Promise.reject(res.data);
         },
         e => {
-          ctx.logger.error('weimob update customer error %j', e);
         }
       );
   }

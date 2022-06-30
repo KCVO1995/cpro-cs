@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:10:40
+ * :date last edited: 2022-06-30 10:18:44
  */
 'use strict';
 const Service = require('egg').Service;
@@ -206,7 +206,6 @@ class ProductService extends Service {
     const { ctx } = this;
     const access_token = await ctx.service.token.get();
     const good = await this.getGoodByProduct(product);
-    ctx.logger.info('weimob import product request %j', good);
     return ctx
       .curl(`${APIS.IMPORT_PRODUCT}?accesstoken=${access_token}`, {
         method: 'POST',
@@ -221,16 +220,12 @@ class ProductService extends Service {
       })
       .then(
         res => {
-          ctx.logger.info('weimob import product %j', res.data);
           const { code, data } = res.data;
           if (code.errcode === '0') {
             this.afterImportOne(data, product);
           } else {
             return Promise.reject(res.data);
           }
-        },
-        e => {
-          ctx.logger.error('weimob import product error %j', e);
         }
       );
   }
@@ -255,16 +250,12 @@ class ProductService extends Service {
       })
       .then(
         res => {
-          ctx.logger.info('weimob update product %j', res.data);
           const { code, data } = res.data;
           if (code.errcode === '0') {
             this.afterUpdateOne(data, product);
           } else {
             return Promise.reject(res.data);
           }
-        },
-        e => {
-          ctx.logger.error('weimob update product error %j', e);
         }
       );
   }
@@ -295,16 +286,12 @@ class ProductService extends Service {
       })
       .then(
         res => {
-          ctx.logger.info('weimob delete product %j', res.data);
           const { code } = res.data;
           if (code.errcode === '0') {
             this.afterDeleteOne(wProductId);
           } else {
             return Promise.reject(res.data);
           }
-        },
-        e => {
-          ctx.logger.error('weimob delete product error %j', e);
         }
       );
   }

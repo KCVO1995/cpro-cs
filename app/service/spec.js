@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-26 17:28:28
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-27 15:20:03
+ * :date last edited: 2022-06-30 10:19:41
  */
 /*
  * :file description:
@@ -45,7 +45,6 @@ class SpecService extends Service {
         if (code.errcode === '0') {
           return ctx.model.Spec.getIdByWid(specId).then(id => ({ data, id }));
         }
-        ctx.logger.error('weimob import spec value error %j', res.data);
         return undefined;
       })
       .then(({ data, id: spec_id }) => {
@@ -85,7 +84,6 @@ class SpecService extends Service {
             yhsd_option_name: name,
           }).then(() => data);
         }
-        ctx.logger.error('weimob import spec error %j', res.data);
         return undefined;
       }).then(data => data.id);
   }

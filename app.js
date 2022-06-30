@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 20:54:32
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:16:37
+ * :date last edited: 2022-06-30 10:57:07
  */
 'use strict';
 // app.js
@@ -43,18 +43,16 @@ class AppBootHook {
     const ctx = await this.app.createAnonymousContext();
     await ctx.service.token.get(false);
 
-    this.app.httpclient.on('request', req => {
-      req.url; // 请求 url
-      req.ctx; // 是发起这次请求的当前上下文
-
-      ctx.logger.info('http request %j', `请求url: ${req.url}`, `请求ctx: ${req.ctx}`);
-    });
+    // TODO 友好请求日志
     this.app.httpclient.on('response', result => {
       result.res.status;
       result.ctx; // 是发起这次请求的当前上下文
       result.req; // 对应的 req 对象，即 request 事件里面那个 req
 
-      ctx.logger.info('http response %j', `请求响应: ${result.req}`);
+      ctx.logger.info('-----------------------------------------------------------------------------------------------------');
+      ctx.logger.info('请求地址: ', result.req.url);
+      ctx.logger.info('请求参数: %j', result.req.args.data);
+      ctx.logger.info('请求结果: %j', result.res.data);
     });
   }
 }
