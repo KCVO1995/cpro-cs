@@ -5,14 +5,13 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:18:44
+ * :date last edited: 2022-07-02 18:51:09
  */
 'use strict';
 const Service = require('egg').Service;
 const async = require('async');
 const { APIS, SHOP_INFO } = require('../constants/index');
 
-// TODO sku 规格数量大于商品规格数量
 class ProductService extends Service {
   async getSpecInfoList(options) {
     const { ctx } = this;
@@ -23,20 +22,22 @@ class ProductService extends Service {
           .then(specId => {
             let index = 0;
 
-            return async.map(option.values, (optionValue, cb2) => {
-              ctx.service.spec
-                .getSpecValueId(specId, optionValue)
-                .then(specValueId => {
-                  index += 1;
-                  cb2(null, {
-                    specValueName: optionValue,
-                    imageUrl: '',
-                    specValueId,
-                    sort: index,
-                    isOpenSizeRecommend: false,
+            return async
+              .map(option.values, (optionValue, cb2) => {
+                ctx.service.spec
+                  .getSpecValueId(specId, optionValue)
+                  .then(specValueId => {
+                    index += 1;
+                    cb2(null, {
+                      specValueName: optionValue,
+                      imageUrl: '',
+                      specValueId,
+                      sort: index,
+                      isOpenSizeRecommend: false,
+                    });
                   });
-                });
-            }).then(skuSpecValueList => ({ skuSpecValueList, specId }));
+              })
+              .then(skuSpecValueList => ({ skuSpecValueList, specId }));
           })
           .then(({ skuSpecValueList, specId }) => {
             cb(null, {
@@ -49,40 +50,56 @@ class ProductService extends Service {
       })
       .catch(e => console.log(e, 'error'));
   }
-  async getSkuList(variants) {
+  async getSkuList(variants, options) {
     const { ctx } = this;
     return async.map(variants, (variant, cb) => {
       async
         .map([ 1, 2, 3 ], (i, cb2) => {
           const key = `option_${i}`;
           if (variant[key]) {
-            ctx.model.SpecValue.getItemByYhsdName(variant[key]).then(
-              specValueItem => {
-                if (specValueItem.w_spec_value_id) {
-                  if (specValueItem.spec.dataValues) {
-                    cb2(null, {
-                      specId: specValueItem.spec.dataValues.w_spec_id,
-                      specValueId: specValueItem.w_spec_value_id,
-                    });
+            const yhsd_option_id = options[i - 1].id;
+            const yhsd_option_values = options[i - 1].values;
+            if (yhsd_option_id && yhsd_option_values.includes(variant[key])) {
+              ctx.model.Spec.getIdByYhsdId(yhsd_option_id)
+                .then(spec_id => {
+                  return ctx.model.SpecValue.getItemByYhsdName(
+                    spec_id,
+                    variant[key]
+                  );
+                })
+                .then(specValueItem => {
+                  if (specValueItem.w_spec_value_id) {
+                    if (specValueItem.spec.dataValues) {
+                      cb2(null, {
+                        specId: specValueItem.spec.dataValues.w_spec_id,
+                        specValueId: specValueItem.w_spec_value_id,
+                      });
+                    } else {
+                      cb2(null, null);
+                    }
                   } else {
                     cb2(null, null);
                   }
-                } else {
-                  cb2(null, null);
-                }
-              }
-            );
+                });
+            } else {
+              cb2(null, null);
+            }
           } else {
             cb2(null, null);
           }
         })
         .then(skuSpecValueList => {
-          cb(null, {
-            skuStockNum: variant.stock,
-            outerSkuCode: variant.id,
-            salePrice: variant.price,
-            skuSpecValueList: skuSpecValueList.filter(item => !!item),
-          });
+          const _skuSpecValueList = skuSpecValueList.filter(item => !!item);
+          if (_skuSpecValueList.length > 0) {
+            cb(null, {
+              skuStockNum: variant.stock,
+              outerSkuCode: variant.id,
+              salePrice: variant.price,
+              skuSpecValueList: _skuSpecValueList,
+            });
+          } else {
+            cb(null, null);
+          }
         });
     });
   }
@@ -140,7 +157,7 @@ class ProductService extends Service {
       good.specInfoList = await this.getSpecInfoList(product.options);
     }
     if (product.variants.length > 0) {
-      good.skuList = await this.getSkuList(product.variants);
+      good.skuList = await (await this.getSkuList(product.variants, product.options)).filter(item => !!item);
     }
     return good;
   }
@@ -151,7 +168,8 @@ class ProductService extends Service {
       yhsd_product_id: product.id,
     }).then(res => {
       const { dataValues } = res;
-      if (data.skuList.length > 0) { // sku
+      if (data.skuList.length > 0) {
+        // sku
         data.skuList.forEach((sku, index) => {
           ctx.model.SkuId.create({
             w_sku_id: sku.skuId,
@@ -169,7 +187,8 @@ class ProductService extends Service {
     const productSkuList = await ctx.model.SkuId.getProductSkuList(productId);
     const dbSkuList = productSkuList.map(item => item.dataValues);
 
-    data.skuList.forEach((sku, index) => { // 微盟返回的 skuList 在原有list中找不到，需要新增
+    data.skuList.forEach((sku, index) => {
+      // 微盟返回的 skuList 在原有list中找不到，需要新增
       const wSkuId = sku.skuId;
       const yhsdSkuId = product.variants[index].id;
       const _sku = dbSkuList.find(
@@ -189,9 +208,9 @@ class ProductService extends Service {
     const yhsdSkuIdList = product.variants.map(item => item.id);
     const unMatchSkuIdList = dbSkuList.filter(
       item =>
-        item.product_id === productId && (
-          !yhsdSkuIdList.includes(item.yhsd_sku_id) ||
-        !wSkuIdList.includes(item.w_sku_id))
+        item.product_id === productId &&
+        (!yhsdSkuIdList.includes(item.yhsd_sku_id) ||
+          !wSkuIdList.includes(item.w_sku_id))
     );
     unMatchSkuIdList.forEach(item => {
       ctx.model.SkuId.destroy({
@@ -218,16 +237,14 @@ class ProductService extends Service {
         contentType: 'json',
         dataType: 'json',
       })
-      .then(
-        res => {
-          const { code, data } = res.data;
-          if (code.errcode === '0') {
-            this.afterImportOne(data, product);
-          } else {
-            return Promise.reject(res.data);
-          }
+      .then(res => {
+        const { code, data } = res.data;
+        if (code.errcode === '0') {
+          this.afterImportOne(data, product);
+        } else {
+          return Promise.reject(res.data);
         }
-      );
+      });
   }
   async updateOne(product) {
     const { ctx } = this;
@@ -248,16 +265,14 @@ class ProductService extends Service {
         contentType: 'json',
         dataType: 'json',
       })
-      .then(
-        res => {
-          const { code, data } = res.data;
-          if (code.errcode === '0') {
-            this.afterUpdateOne(data, product);
-          } else {
-            return Promise.reject(res.data);
-          }
+      .then(res => {
+        const { code, data } = res.data;
+        if (code.errcode === '0') {
+          this.afterUpdateOne(data, product);
+        } else {
+          return Promise.reject(res.data);
         }
-      );
+      });
   }
   afterDeleteOne(wProductId) {
     const { ctx } = this;
@@ -284,16 +299,14 @@ class ProductService extends Service {
         contentType: 'json',
         dataType: 'json',
       })
-      .then(
-        res => {
-          const { code } = res.data;
-          if (code.errcode === '0') {
-            this.afterDeleteOne(wProductId);
-          } else {
-            return Promise.reject(res.data);
-          }
+      .then(res => {
+        const { code } = res.data;
+        if (code.errcode === '0') {
+          this.afterDeleteOne(wProductId);
+        } else {
+          return Promise.reject(res.data);
         }
-      );
+      });
   }
 }
 
