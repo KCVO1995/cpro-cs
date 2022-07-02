@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-24 23:27:23
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-27 15:01:13
+ * :date last edited: 2022-07-02 18:05:40
  */
 'use strict';
 
@@ -29,10 +29,14 @@ module.exports = app => {
     }
   );
 
-  SpecValue.getItemByYhsdName = async function(yhsd_option_value_name) {
+  SpecValue.getItemByYhsdName = async function(
+    spec_id,
+    yhsd_option_value_name
+  ) {
     const c = await this.findOne({
       where: {
         yhsd_option_value_name,
+        spec_id,
       },
       include: [{ model: app.model.Spec }],
     });

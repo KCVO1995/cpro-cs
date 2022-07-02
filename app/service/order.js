@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:21:23
+ * :date last edited: 2022-06-30 14:40:42
  */
 'use strict';
 // app/service/user.js
@@ -63,7 +63,7 @@ class OrderService extends Service {
   getTime(date) {
     return date ? new Date(date).getTime() : '';
   }
-  getTimeList(order) { // TODO
+  getTimeList(order) {
     const timeList = [];
     if (order.created_at) {
       timeList.push({ type: 101, value: this.getTime(order.created_at) });
@@ -71,11 +71,11 @@ class OrderService extends Service {
     if (order.pay_at) {
       timeList.push({ type: 102, value: this.getTime(order.pay_at) });
     }
+    return timeList;
   }
   async getCustomerWid(customer) {
     const { ctx } = this;
     const wid = await ctx.model.Customer.getWidByYhsdId(customer.id);
-    console.log(wid, '------wid------');
     if (wid) return wid;
     await ctx.service.customer.importOne(customer);
     return await ctx.model.Customer.getWidByYhsdId(customer.id);
@@ -97,12 +97,12 @@ class OrderService extends Service {
         receiveInfo: {
           addressInfo: {
             address: address.complete_address,
+            province: address.province,
+            area: ' ',
+            city: address.city,
+            county: address.district,
+            zip: address.zipcode,
             addressExt: {
-              area: ' ',
-              city: address.city,
-              county: address.district,
-              province: address.province,
-              zip: address.zipcode,
             },
           },
           receiverInfo: {
@@ -110,18 +110,19 @@ class OrderService extends Service {
             receiverName: address.name,
           },
         },
+        sendInfo: {},
       },
       discountInfoList,
       itemInfoList,
       merchantInfo: {
         bosId: SHOP_INFO.SHOP_ID,
-        processVid: '', // TODO
+        processVid: SHOP_INFO.VID,
         processVidType: 2,
         vid: SHOP_INFO.VID,
         vidType: 10,
       },
       orderBaseInfo: {
-        channelType: 2,
+        channelType: 280,
         deliveryType: 1,
         payStatus: order.payment_status === 'paid' ? 1 : 0,
         payTime:
@@ -132,8 +133,9 @@ class OrderService extends Service {
         outerOrderNo: order.order_no,
         saleChannelType: 10001,
         bizSourceType: 1,
+        orderStatus: 0,
+        timeList,
       },
-      timeList,
       payInfo: {
         payAmount: order.total_amount,
         totalAmount: order.total_amount,
@@ -152,7 +154,7 @@ class OrderService extends Service {
   }
   async importOne(order) {
     const { ctx } = this;
-    const access_token = ctx.service.token.get();
+    const access_token = await ctx.service.token.get();
     const orderInfo = await this.getOrderInfo(order);
 
     return ctx

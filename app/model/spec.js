@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-24 23:25:49
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-26 17:38:56
+ * :date last edited: 2022-07-02 18:13:22
  */
 'use strict';
 
@@ -29,6 +29,7 @@ module.exports = app => {
     }
   );
 
+
   Spec.getWidByYhsdId = async function(yhsd_option_id) {
     const c = await this.findOne({
       where: {
@@ -37,6 +38,18 @@ module.exports = app => {
     });
     if (c && c.dataValues && c.dataValues.w_spec_id) {
       return c.dataValues.w_spec_id;
+    }
+    return undefined;
+  };
+
+  Spec.getIdByYhsdId = async function(yhsd_option_id) {
+    const c = await this.findOne({
+      where: {
+        yhsd_option_id,
+      },
+    });
+    if (c && c.dataValues && c.dataValues.id) {
+      return c.dataValues.id;
     }
     return undefined;
   };
