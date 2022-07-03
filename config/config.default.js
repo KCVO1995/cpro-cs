@@ -24,6 +24,13 @@ module.exports = appInfo => {
     },
   };
 
+  config.shopInfo = {
+    client_id: '4FF19749D0F5F4A1294ECC312586C918',
+    client_secret: '9D0C75C6DCDB050318D2F8478BDBE45E',
+    shop_type: 'business_operation_system_id',
+    category_id: 43,
+  };
+
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',

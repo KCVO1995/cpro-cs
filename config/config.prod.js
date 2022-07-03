@@ -1,5 +1,14 @@
 /*
  * :file description:
+ * :name: /cpro-cs/config/config.prod.js
+ * :author: 李彦辉Jacky
+ * :copyright: (c) 2022, Tungee
+ * :date created: 2022-07-03 16:58:14
+ * :last editor: 李彦辉Jacky
+ * :date last edited: 2022-07-03 16:58:54
+ */
+/*
+ * :file description:
  * :name: /cpro-cs/config/config.local.js
  * :author: 李彦辉Jacky
  * :copyright: (c) 2022, Tungee
@@ -21,16 +30,17 @@ module.exports = () => {
    **/
   const config = exports = {};
 
-  config.sequelize = {
-    database: 'cs_development',
-    dialect: 'mysql',
-    host: 'localhost',
-    password: 'kcvo',
-    port: 3306,
-  };
+  // TODO
+  // config.sequelize = {
+  //   database: 'cs_development',
+  //   dialect: 'mysql',
+  //   host: 'localhost',
+  //   password: 'kcvo',
+  //   port: 3306,
+  // };
   config.shopInfo = {
-    shop_id: 4020504537894,
-    vid: 6015253092894,
+    shop_id: 4020502275894,
+    vid: 6015252206894,
   };
 
   return {

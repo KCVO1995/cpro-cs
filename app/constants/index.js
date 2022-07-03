@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:38:40
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-29 22:17:46
+ * :date last edited: 2022-07-03 16:53:49
  */
 
 'use strict';
@@ -27,20 +27,4 @@ const APIS = {
   IMPORT_CATEGORY: 'https://dopen.weimob.com/apigw/weimob_shop/v2.0/goods/classify/insert',
 };
 
-const CLIENT_ID = '4FF19749D0F5F4A1294ECC312586C918';
-const CLIENT_SECRET = '9D0C75C6DCDB050318D2F8478BDBE45E';
-const SHOP_ID = 4020502275894;
-const SHOP_TYPE = 'business_operation_system_id';
-const VID = 6015252206894;
-const CATEGORY_ID = 43;
-
-const SHOP_INFO = {
-  CLIENT_ID,
-  CLIENT_SECRET,
-  SHOP_ID,
-  SHOP_TYPE,
-  CATEGORY_ID,
-  VID,
-};
-
-module.exports = { APIS, SHOP_INFO };
+module.exports = { APIS };
