@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 16:51:04
+ * :date last edited: 2022-07-03 17:18:52
  */
 /*
  * :file description:
@@ -23,10 +23,9 @@ const Controller = require('egg').Controller;
 class OrderController extends Controller {
   async create() {
     const { ctx } = this;
-    console.log(this.app.config, 'xxx');
 
     try {
-      // await ctx.service.order.importOne(ctx.request.body);
+      await ctx.service.order.importOne(ctx.request.body);
       ctx.status = 200;
     } catch (e) {
       ctx.status = 400;

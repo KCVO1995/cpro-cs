@@ -5,12 +5,12 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-27 15:44:13
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:19:32
+ * :date last edited: 2022-07-03 17:01:04
  */
 'use strict';
 const Service = require('egg').Service;
 const async = require('async');
-const { APIS, SHOP_INFO } = require('../constants/index');
+const { APIS } = require('../constants/index');
 
 class CategoryService extends Service {
   saveOne(yhsd_category_id, w_category_id) {
@@ -34,7 +34,7 @@ class CategoryService extends Service {
     return ids;
   }
   async importOne(type) {
-    const { ctx } = this;
+    const { ctx, app } = this;
     const { id, name } = type;
     const access_token = await ctx.service.token.get();
     return ctx
@@ -43,7 +43,7 @@ class CategoryService extends Service {
         data: {
           name: name.substr(0, 20),
           basicInfo: {
-            vid: SHOP_INFO.VID,
+            vid: app.config.shopInfo.vid,
           },
         },
         contentType: 'json',

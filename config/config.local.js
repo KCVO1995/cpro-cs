@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 19:30:08
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 16:58:07
+ * :date last edited: 2022-07-03 17:15:12
  */
 /* eslint valid-jsdoc: "off" */
 
@@ -29,8 +29,10 @@ module.exports = () => {
     port: 3306,
   };
   config.shopInfo = {
-    shop_id: 4020504537894,
-    vid: 6015253092894,
+    // shopId: 4020504537894,
+    // vid: 6015253092894,
+    shopId: 4020502275894,
+    vid: 6015252206894,
   };
 
   return {

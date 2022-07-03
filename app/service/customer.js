@@ -5,11 +5,11 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 16:52:43
+ * :date last edited: 2022-07-03 17:01:46
  */
 'use strict';
 const Service = require('egg').Service;
-const { APIS, SHOP_INFO } = require('../constants/index');
+const { APIS } = require('../constants/index');
 
 class CustomerService extends Service {
   async afterImportOne(customer, wid) {
@@ -24,7 +24,7 @@ class CustomerService extends Service {
       appChannel: 3,
       userKey: 1,
       belongVidName: 'Collegepro',
-      belongVid: SHOP_INFO.VID,
+      belongVid: this.app.config.shopInfo.vid,
     };
     if (customer.reg_type === 'mobile') {
       user.phone = customer.reg_identity;
@@ -76,7 +76,7 @@ class CustomerService extends Service {
       );
   }
   async updateOne(customer) {
-    const { ctx } = this;
+    const { ctx, app } = this;
     const access_token = await ctx.service.token.get();
     const wid = await ctx.model.Customer.getWidByYhsdId(customer.id);
     if (!wid) {
@@ -87,7 +87,7 @@ class CustomerService extends Service {
       .curl(`${APIS.UPDATE_CUSTOMER}?accesstoken=${access_token}`, {
         method: 'POST',
         data: {
-          vid: SHOP_INFO.VID,
+          vid: app.config.shopInfo.vid,
           wid,
           ...user,
         },

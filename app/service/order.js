@@ -5,13 +5,13 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 16:52:12
+ * :date last edited: 2022-07-03 17:07:23
  */
 'use strict';
 // app/service/user.js
 const Service = require('egg').Service;
 const async = require('async');
-const { APIS, SHOP_INFO } = require('../constants/index');
+const { APIS } = require('../constants/index');
 
 class OrderService extends Service {
   getDiscountInfoList(order) {
@@ -88,6 +88,7 @@ class OrderService extends Service {
     return await ctx.model.Customer.getWidByYhsdId(customer.id);
   }
   async getOrderInfo(order) {
+    const { app } = this;
     const { customer, address } = order;
     const wid = await this.getCustomerWid(customer);
     // const discountInfoList = this.getDiscountInfoList(order);
@@ -129,10 +130,9 @@ class OrderService extends Service {
       // discountInfoList,
       itemInfoList,
       merchantInfo: {
-        // bosId: SHOP_INFO.SHOP_ID,
-        processVid: SHOP_INFO.VID,
+        processVid: app.config.shopInfo.vid,
         processVidType: 2,
-        vid: SHOP_INFO.VID,
+        vid: app.config.shopInfo.vid,
         vidType: 2,
       },
       orderBaseInfo: {

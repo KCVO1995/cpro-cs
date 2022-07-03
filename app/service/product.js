@@ -5,12 +5,12 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-02 18:51:09
+ * :date last edited: 2022-07-03 17:07:26
  */
 'use strict';
 const Service = require('egg').Service;
 const async = require('async');
-const { APIS, SHOP_INFO } = require('../constants/index');
+const { APIS } = require('../constants/index');
 
 class ProductService extends Service {
   async getSpecInfoList(options) {
@@ -222,7 +222,7 @@ class ProductService extends Service {
     });
   }
   async importOne(product) {
-    const { ctx } = this;
+    const { ctx, app } = this;
     const access_token = await ctx.service.token.get();
     const good = await this.getGoodByProduct(product);
     return ctx
@@ -230,7 +230,7 @@ class ProductService extends Service {
         method: 'POST',
         data: {
           basicInfo: {
-            vid: SHOP_INFO.VID,
+            vid: app.config.shopInfo.vid,
           },
           ...good,
         },
@@ -247,7 +247,7 @@ class ProductService extends Service {
       });
   }
   async updateOne(product) {
-    const { ctx } = this;
+    const { ctx, app } = this;
     const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
     if (!wProductId) return this.importOne(product);
     const access_token = await ctx.service.token.get();
@@ -257,7 +257,7 @@ class ProductService extends Service {
         method: 'POST',
         data: {
           basicInfo: {
-            vid: SHOP_INFO.VID,
+            vid: app.config.shopInfo.vid,
           },
           goodsId: wProductId,
           ...good,
@@ -283,7 +283,7 @@ class ProductService extends Service {
     });
   }
   async deleteOne(product) {
-    const { ctx } = this;
+    const { ctx, app } = this;
     const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
     if (!wProductId) return 'OK';
     const access_token = await ctx.service.token.get();
@@ -292,7 +292,7 @@ class ProductService extends Service {
         method: 'POST',
         data: {
           basicInfo: {
-            vid: SHOP_INFO.VID,
+            vid: app.config.shopInfo.vid,
           },
           goodsIdList: [ wProductId ],
         },

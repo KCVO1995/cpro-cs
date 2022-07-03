@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-26 17:28:28
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:19:41
+ * :date last edited: 2022-07-03 17:04:15
  */
 /*
  * :file description:
@@ -18,11 +18,11 @@
  */
 'use strict';
 const Service = require('egg').Service;
-const { APIS, SHOP_INFO } = require('../constants/index');
+const { APIS } = require('../constants/index');
 
 class SpecService extends Service {
   async getSpecValueId(specId, specValueName) {
-    const { ctx } = this;
+    const { ctx, app } = this;
     const wSpecValueId = await ctx.model.SpecValue.getWidByYhsdName(specValueName);
     if (wSpecValueId) return wSpecValueId;
     const access_token = await ctx.service.token.get();
@@ -31,9 +31,9 @@ class SpecService extends Service {
         method: 'POST',
         data: {
           basicInfo: {
-            vid: SHOP_INFO.VID,
+            vid: app.config.shopInfo.vid,
           },
-          categoryId: SHOP_INFO.CATEGORY_ID,
+          categoryId: app.config.shopInfo.categoryId,
           specId,
           specValueName,
         },
@@ -58,7 +58,7 @@ class SpecService extends Service {
   }
   async getSpecId(option) {
     const { id, name } = option;
-    const { ctx } = this;
+    const { ctx, app } = this;
     const wSpecId = await ctx.model.Spec.getWidByYhsdId(id);
     if (wSpecId) return wSpecId;
     const access_token = await ctx.service.token.get();
@@ -67,9 +67,9 @@ class SpecService extends Service {
         method: 'POST',
         data: {
           basicInfo: {
-            vid: SHOP_INFO.VID,
+            vid: app.config.shopInfo.vid,
           },
-          categoryId: SHOP_INFO.CATEGORY_ID,
+          categoryId: app.config.shopInfo.categoryId,
           specName: name,
         },
         contentType: 'json',

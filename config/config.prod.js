@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-07-03 16:58:14
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 16:58:54
+ * :date last edited: 2022-07-03 17:15:33
  */
 /*
  * :file description:
@@ -39,7 +39,7 @@ module.exports = () => {
   //   port: 3306,
   // };
   config.shopInfo = {
-    shop_id: 4020502275894,
+    shopId: 4020502275894,
     vid: 6015252206894,
   };
 

@@ -5,11 +5,11 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-26 14:59:00
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:19:46
+ * :date last edited: 2022-07-03 17:07:16
  */
 'use strict';
 const Service = require('egg').Service;
-const { APIS, SHOP_INFO } = require('../constants/index');
+const { APIS } = require('../constants/index');
 
 class VendorService extends Service {
   saveOne(yhsd_brand_id, w_brand_id) {
@@ -26,7 +26,7 @@ class VendorService extends Service {
     return await this.importOne(vendor);
   }
   async importOne(vendor) {
-    const { ctx } = this;
+    const { ctx, app } = this;
     const { id, name } = vendor;
     const access_token = await ctx.service.token.get();
     return ctx.curl(`${APIS.IMPORT_BRAND}?accesstoken=${access_token}`, {
@@ -34,7 +34,7 @@ class VendorService extends Service {
       data: {
         title: name,
         basicInfo: {
-          vid: SHOP_INFO.VID,
+          vid: app.config.shopInfo.vid,
         },
       },
       contentType: 'json',
