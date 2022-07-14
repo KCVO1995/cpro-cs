@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 17:18:52
+ * :date last edited: 2022-07-14 17:38:34
  */
 /*
  * :file description:
@@ -31,6 +31,27 @@ class OrderController extends Controller {
       ctx.status = 400;
     }
   }
+  async update() {
+    const { ctx } = this;
+
+    try {
+      // await ctx.service.order.updateOne(ctx.request.body);
+      ctx.status = 200;
+    } catch (e) {
+      ctx.status = 400;
+    }
+  }
+  async cancel() {
+    const { ctx } = this;
+
+    try {
+      await ctx.service.order.cancelOne(ctx.request.body);
+      ctx.status = 200;
+    } catch (e) {
+      ctx.status = 400;
+    }
+  }
+
 }
 
 module.exports = OrderController;

@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 22:53:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-21 21:14:24
+ * :date last edited: 2022-07-14 17:42:55
  */
 /*
  * :file description:
@@ -37,12 +37,19 @@ module.exports = app => {
     }
   );
 
-  return class extends Order {
-
-    static associate() {
-      app.model.Order.hasMany(app.model.AfterSale);
-    }
-
+  Order.getWidByYhsdId = async function(yhsd_order) {
+    const c = await this.findOne({
+      where: {
+        yhsd_order,
+      },
+    });
+    if (c && c.dataValues && c.dataValues.w_order) return c.dataValues.w_order;
+    return undefined;
   };
 
+  Order.associate = function() {
+    app.model.Order.hasMany(app.model.AfterSale);
+  };
+
+  return Order;
 };

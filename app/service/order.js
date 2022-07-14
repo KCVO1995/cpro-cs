@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 16:10:05
+ * :date last edited: 2022-07-14 17:51:43
  */
 'use strict';
 // app/service/user.js
@@ -14,6 +14,7 @@ const async = require('async');
 const { APIS } = require('../constants/index');
 
 // TODO 优惠金额存在问题
+// TODO 添加商品完成后需要延时一会, 导入商品后，立刻导入订单会出现 skuId 不存在
 class OrderService extends Service {
   getDiscountInfoList(order) {
     const discountInfoList = [];
@@ -34,11 +35,13 @@ class OrderService extends Service {
           console.log(id, 'ppppp id');
           if (id) return id;
           return ctx.helper.getYhsdProduct(item.product_id).then(product => {
-            return ctx.service.product.importOne(product);
+            return ctx.service.product
+              .importOne(product)
+              .then(() => ctx.helper.sleep(800));
           });
         })
         .then(() => {
-          return ctx.model.SkuId.getWidByYhsdId(item.variant_id);
+          return ctx.model.SkuId.getWidByYhsdId(item.barcode || item.variant_id);
         })
         .then(wSkuId => {
           console.log(wSkuId, 'wSkuId');
@@ -215,9 +218,35 @@ class OrderService extends Service {
         return Promise.reject(res);
       });
   }
-  async updateOne(order) {
+  async cancelOne(order) {
+    const { ctx } = this;
+    const access_token = await ctx.service.token.get();
+    let orderNo = await ctx.model.Order.getWidByYhsdId(order.id);
+    if (!orderNo) {
+      await this.importOne(order);
+      orderNo = await ctx.model.Order.getWidByYhsdId(order.id);
+    }
 
+    return ctx
+      .curl(`${APIS.CANCEL_ORDER}?accesstoken=${access_token}`, {
+        method: 'POST',
+        data: {
+          cancelReason: '客户取消订单',
+          orderNo,
+          specificCancelReason: '客户取消订单',
+        },
+        contentType: 'json',
+        dataType: 'json',
+      })
+      .then(res => {
+        const { code, data } = res.data;
+        if (code.errcode === '0') {
+          return this.afterImportOne(order.id, data);
+        }
+        return Promise.reject(res);
+      });
   }
+
 }
 
 module.exports = OrderService;
