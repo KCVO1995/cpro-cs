@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 17:51:43
+ * :date last edited: 2022-07-14 18:31:39
  */
 'use strict';
 // app/service/user.js
@@ -218,6 +218,7 @@ class OrderService extends Service {
         return Promise.reject(res);
       });
   }
+  // TODO 无法同步取消信息
   async cancelOne(order) {
     const { ctx } = this;
     const access_token = await ctx.service.token.get();
@@ -239,14 +240,66 @@ class OrderService extends Service {
         dataType: 'json',
       })
       .then(res => {
-        const { code, data } = res.data;
+        const { code } = res.data;
         if (code.errcode === '0') {
-          return this.afterImportOne(order.id, data);
+          return true;
         }
         return Promise.reject(res);
       });
   }
+  // {"code":{"errcode":"00145037020040003","errmsg":"[发货失败]履约父单不存在","globalTicket":"29452-1657794616.433-saas-w1-455-47695573803","monitorTrackId":"2de1ce9f-6ba2-457a-a4a2-04a7b2b61549"},"data":null}
+  async deliverOne(order) {
+    const { ctx, app } = this;
+    const access_token = await ctx.service.token.get();
+    let orderNo = await ctx.model.Order.getWidByYhsdId(order.id);
+    if (!orderNo) {
+      await this.importOne(order);
+      orderNo = await ctx.model.Order.getWidByYhsdId(order.id);
+    }
+    orderNo = parseInt(orderNo);
 
+    const fulfillItems = [];
+    order.shipments.forEach(shipment => {
+      fulfillItems.push({
+        orderItemId: orderNo,
+        skuNum: shipment.items.length,
+      });
+    });
+
+    return ctx
+      .curl(`${APIS.DELIVER_ORDER}?accesstoken=${access_token}`, {
+        method: 'POST',
+        data: {
+          logistics: {
+            deliveryNo: 'SF365546724374',
+            deliveryCompanyCode: 'shunfeng',
+            deliveryCompanyName: '顺丰速运',
+          },
+          orderNo,
+          isSplitPackage: order.shipments.length > 1,
+          fulfillMethod: 1,
+          fulfillItems,
+          operatorVo: {
+            operatorId: '10037478263',
+            operatorName: '管理员',
+            operatorPhone: '17344429467',
+          },
+          basicInfo: {
+            vid: app.config.shopInfo.vid,
+            vidType: 10,
+          },
+        },
+        contentType: 'json',
+        dataType: 'json',
+      })
+      .then(res => {
+        const { code } = res.data;
+        if (code.errcode === '0') {
+          return true;
+        }
+        return Promise.reject(res);
+      });
+  }
 }
 
 module.exports = OrderService;
