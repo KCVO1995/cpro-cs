@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 19:30:08
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 15:23:21
+ * :date last edited: 2022-07-14 15:59:31
  */
 /* eslint valid-jsdoc: "off" */
 
@@ -31,8 +31,6 @@ module.exports = () => {
   config.shopInfo = {
     shopId: 4020504537894,
     vid: 6015253092894,
-    // shopId: 4020502275894,
-    // vid: 6015252206894,
   };
 
   return {

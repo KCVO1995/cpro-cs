@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 17:45:19
+ * :date last edited: 2022-07-14 16:05:30
  */
 'use strict';
 const Service = require('egg').Service;
@@ -13,6 +13,9 @@ const async = require('async');
 const { APIS } = require('../constants/index');
 
 class ProductService extends Service {
+  async getYhsdSkuId(variant) {
+    return variant.barcode || variant.id;
+  }
   async getSpecInfoList(options) {
     const { ctx } = this;
     return async
@@ -173,7 +176,7 @@ class ProductService extends Service {
         data.skuList.forEach((sku, index) => {
           ctx.model.SkuId.create({
             w_sku_id: sku.skuId,
-            yhsd_sku_id: product.variants[index].id,
+            yhsd_sku_id: this.getYhsdSkuId(product.variants[index]),
             product_id: dataValues.id,
           });
         });
@@ -190,14 +193,14 @@ class ProductService extends Service {
     data.skuList.forEach((sku, index) => {
       // 微盟返回的 skuList 在原有list中找不到，需要新增
       const wSkuId = sku.skuId;
-      const yhsdSkuId = product.variants[index].id;
+      const yhsdSkuId = this.getYhsdSkuId(product.variants[index]);
       const _sku = dbSkuList.find(
         item => item.w_sku_id === wSkuId && item.yhsd_sku_id === yhsdSkuId
       );
       if (!_sku) {
         ctx.model.SkuId.create({
           w_sku_id: sku.skuId,
-          yhsd_sku_id: product.variants[index].id,
+          yhsd_sku_id: yhsdSkuId,
           product_id: productId,
         });
       }

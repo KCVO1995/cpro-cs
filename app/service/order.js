@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-13 23:02:08
+ * :date last edited: 2022-07-14 16:03:29
  */
 'use strict';
 // app/service/user.js
@@ -13,6 +13,7 @@ const Service = require('egg').Service;
 const async = require('async');
 const { APIS } = require('../constants/index');
 
+// TODO 优惠金额存在问题
 class OrderService extends Service {
   getDiscountInfoList(order) {
     const discountInfoList = [];
@@ -211,6 +212,9 @@ class OrderService extends Service {
         }
         return Promise.reject(res);
       });
+  }
+  async updateOne(order) {
+
   }
 }
 
