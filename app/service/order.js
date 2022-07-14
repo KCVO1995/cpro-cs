@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 22:09:49
+ * :date last edited: 2022-07-14 22:31:16
  */
 'use strict';
 // app/service/user.js
@@ -47,6 +47,16 @@ class OrderService extends Service {
       timeList.push({
         type: 104,
         value: ctx.helper.getTime(order.shipments[0].created_at),
+      });
+    }
+    if (order.shipments.length > 0 && order.shipment_status === 'recieved') {
+      timeList.push({
+        type: 104,
+        value: ctx.helper.getTime(order.shipments[0].created_at),
+      });
+      timeList.push({
+        type: 106,
+        value: ctx.helper.getTime(order.shipments[0].receive_at),
       });
     }
     if (order.status === 'achieved') {
