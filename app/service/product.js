@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 17:07:26
+ * :date last edited: 2022-07-03 17:45:19
  */
 'use strict';
 const Service = require('egg').Service;
@@ -92,7 +92,7 @@ class ProductService extends Service {
           const _skuSpecValueList = skuSpecValueList.filter(item => !!item);
           if (_skuSpecValueList.length > 0) {
             cb(null, {
-              skuStockNum: variant.stock,
+              skuStockNum: variant.stock > 0 ? variant.stock : 0,
               outerSkuCode: variant.id,
               salePrice: variant.price,
               skuSpecValueList: _skuSpecValueList,
@@ -163,7 +163,7 @@ class ProductService extends Service {
   }
   afterImportOne(data, product) {
     const { ctx } = this;
-    ctx.model.Product.create({
+    return ctx.model.Product.create({
       w_product_id: data.goodsId,
       yhsd_product_id: product.id,
     }).then(res => {
@@ -240,10 +240,10 @@ class ProductService extends Service {
       .then(res => {
         const { code, data } = res.data;
         if (code.errcode === '0') {
-          this.afterImportOne(data, product);
-        } else {
-          return Promise.reject(res.data);
+          return this.afterImportOne(data, product);
         }
+        return Promise.reject(res.data);
+
       });
   }
   async updateOne(product) {

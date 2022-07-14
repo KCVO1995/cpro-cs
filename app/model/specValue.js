@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-24 23:27:23
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-02 18:05:40
+ * :date last edited: 2022-07-13 23:16:13
  */
 'use strict';
 
@@ -17,7 +17,7 @@ module.exports = app => {
     {
       id: { type: INTEGER, primaryKey: true, autoIncrement: true },
       w_spec_value_id: { type: BIGINT, unique: true },
-      spec_id: { type: INTEGER, unique: true },
+      spec_id: { type: INTEGER },
       yhsd_option_value_name: { type: STRING },
       created_at: DATE(6),
       updated_at: DATE(6),

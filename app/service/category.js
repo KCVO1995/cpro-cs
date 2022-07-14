@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-27 15:44:13
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 17:01:04
+ * :date last edited: 2022-07-03 17:24:11
  */
 'use strict';
 const Service = require('egg').Service;
@@ -24,7 +24,6 @@ class CategoryService extends Service {
     const { ctx } = this;
     const ids = await async.map(types, (type, cb) => {
       ctx.model.Category.getWidByYhsdId(type.id).then(wid => {
-        console.log(wid, '-------wid-------');
         if (wid) cb(null, wid);
         else {
           this.importOne(type).then(_wid => cb(null, _wid));
@@ -41,7 +40,7 @@ class CategoryService extends Service {
       .curl(`${APIS.IMPORT_CATEGORY}?accesstoken=${access_token}`, {
         method: 'POST',
         data: {
-          name: name.substr(0, 20),
+          name: (id + name).substr(0, 20),
           basicInfo: {
             vid: app.config.shopInfo.vid,
           },

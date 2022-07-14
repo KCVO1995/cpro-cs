@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 17:07:23
+ * :date last edited: 2022-07-13 23:02:08
  */
 'use strict';
 // app/service/user.js
@@ -28,42 +28,48 @@ class OrderService extends Service {
   async getItemInfoList(order) {
     const { ctx } = this;
     const itemInfoList = await async.map(order.items, (item, cb) => {
-      ctx.model.Product.getIdByYhsdId(item.product_id).then(id => {
-        if (id) return id;
-        return ctx.helper.getYhsdProduct(item.product_id)
-          .then(product => {
+      ctx.model.Product.getIdByYhsdId(item.product_id)
+        .then(id => {
+          console.log(id, 'ppppp id');
+          if (id) return id;
+          return ctx.helper.getYhsdProduct(item.product_id).then(product => {
             return ctx.service.product.importOne(product);
           });
-      });
-      ctx.model.SkuId.getWidByYhsdId(item.variant_id).then(wSkuId => {
-        if (wSkuId) {
-          cb(null, {
-            discountInfoList: [],
-            goodsInfo: {
-              salePrice: item.price,
-              skuId: wSkuId,
-              skuNum: item.quantity,
-              goodsSellMode: 1,
-            },
-            outItemId: item.id,
-            payInfo: {
-              payAmount: item.price,
-              totalAmount: item.price,
-              shouldPayAmount: item.price,
-              amountInfos: [
-                {
-                  type: 1,
-                  amount: item.price,
-                  payAmount: item.price,
-                  shouldPayAmount: item.price,
-                },
-              ],
-            },
-          });
-        } else {
-          cb(null, null);
-        }
-      });
+        })
+        .then(() => {
+          return ctx.model.SkuId.getWidByYhsdId(item.variant_id);
+        })
+        .then(wSkuId => {
+          console.log(wSkuId, 'wSkuId');
+          if (wSkuId) {
+            const price = item.price * item.quantity;
+            cb(null, {
+              discountInfoList: [],
+              goodsInfo: {
+                salePrice: item.price,
+                skuId: wSkuId,
+                skuNum: item.quantity,
+                goodsSellMode: 1,
+              },
+              outItemId: item.id,
+              payInfo: {
+                payAmount: price,
+                totalAmount: price,
+                shouldPayAmount: price,
+                amountInfos: [
+                  {
+                    type: 1,
+                    amount: price,
+                    payAmount: price,
+                    shouldPayAmount: price,
+                  },
+                ],
+              },
+            });
+          } else {
+            cb(null, null);
+          }
+        });
     });
     return itemInfoList.filter(item => item);
   }
@@ -80,7 +86,7 @@ class OrderService extends Service {
     }
     return timeList;
   }
-  async getCustomerWid(customer) { // TODO find or create
+  async getCustomerWid(customer) {
     const { ctx } = this;
     const wid = await ctx.model.Customer.getWidByYhsdId(customer.id);
     if (wid) return wid;
@@ -91,10 +97,9 @@ class OrderService extends Service {
     const { app } = this;
     const { customer, address } = order;
     const wid = await this.getCustomerWid(customer);
-    // const discountInfoList = this.getDiscountInfoList(order);
+    const discountInfoList = this.getDiscountInfoList(order);
     const itemInfoList = await this.getItemInfoList(order);
     const timeList = this.getTimeList(order);
-    const shouldPayAmount = order.total_amount - order.discount_amount;
     return {
       buyerInfo: {
         userNickName: customer.name,
@@ -127,7 +132,7 @@ class OrderService extends Service {
           senderName: 'cpro',
         },
       },
-      // discountInfoList,
+      discountInfoList,
       itemInfoList,
       merchantInfo: {
         processVid: app.config.shopInfo.vid,
@@ -152,15 +157,23 @@ class OrderService extends Service {
       },
       payInfo: {
         payAmount: order.total_amount,
-        totalAmount: order.total_amount,
+        totalAmount: order.total_amount + order.discount_amount,
         totalDiscountAmount: order.discount_amount,
-        shouldPayAmount,
+        shouldPayAmount: order.total_amount,
         amountInfos: [
           {
+            // 商品金额
             type: 1,
-            amount: order.total_amount,
-            totalDiscountAmount: order.discount_amount,
-            shouldPayAmount,
+            amount: order.item_amount,
+            payAmount: order.item_amount,
+            shouldPayAmount: order.item_amount,
+          },
+          {
+            // 运费
+            type: 250,
+            amount: order.shipment_amount,
+            payAmount: order.shipment_amount,
+            shouldPayAmount: order.shipment_amount,
           },
         ],
       },
@@ -168,11 +181,14 @@ class OrderService extends Service {
   }
   async afterImportOne(yhsdOrderId, orderData) {
     const { ctx } = this;
-    const { outputInfo: { orderNo } } = orderData;
+    const {
+      outputInfo: { orderNo },
+    } = orderData;
     ctx.model.Order.create({
       yhsd_order: yhsdOrderId,
       w_order: orderNo,
     });
+    return 'ok';
   }
   async importOne(order) {
     const { ctx } = this;
@@ -188,15 +204,13 @@ class OrderService extends Service {
         contentType: 'json',
         dataType: 'json',
       })
-      .then(
-        res => {
-          const { code, data } = res;
-          if (code.errcode === '0') {
-            this.afterImportOne(order.id, data);
-            return 'ok';
-          }
-          return Promise.reject(res);
-        });
+      .then(res => {
+        const { code, data } = res.data;
+        if (code.errcode === '0') {
+          return this.afterImportOne(order.id, data);
+        }
+        return Promise.reject(res);
+      });
   }
 }
 
