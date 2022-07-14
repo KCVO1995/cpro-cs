@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 21:51:51
+ * :date last edited: 2022-07-14 22:09:49
  */
 'use strict';
 // app/service/user.js
@@ -21,10 +21,12 @@ class OrderService extends Service {
     if (order.status === 'achieved') return 8; // 已完成
     if (order.status === 'processing') {
       if (order.payment_status === 'pending') return 0; // 创建未付款
-      if (order.payment_status === 'paid') return 2; // 创建已付款
-      if (order.shipment_status === 'pending') return 3; // 待发货
-      if (order.shipment_status === 'sending') return 5; // 已发货
-      if (order.shipment_status === 'recieved') return 7; // 已发货
+      if (order.payment_status === 'paid') { // 创建已付款
+        if (order.shipment_status === 'pending') return 3; // 待发货
+        if (order.shipment_status === 'sending') return 5; // 已发货
+        if (order.shipment_status === 'recieved') return 7; // 已发货
+        return 2;
+      }
     }
     return 0; // 创建
   }
@@ -38,6 +40,7 @@ class OrderService extends Service {
     if (order.pay_at) {
       // 支付时间
       timeList.push({ type: 102, value: ctx.helper.getTime(order.pay_at) });
+      timeList.push({ type: 103, value: ctx.helper.getTime(order.pay_at) });
     }
     if (order.shipments.length > 0 && order.shipment_status === 'sending') {
       // 首次发货时间
@@ -301,7 +304,7 @@ class OrderService extends Service {
   }
 
   async updateOne(order) {
-    const { ctx } = this;
+    const { ctx, app } = this;
     const access_token = await ctx.service.token.get();
     const orderNo = await this.getOrderNo(order);
     const timeList = this.getTimeList(order);
@@ -313,6 +316,7 @@ class OrderService extends Service {
       orderNo,
       orderStatus,
       orderTimeInfos: timeList,
+      enableDeliveryTime: ctx.helper.getTime(new Date()),
     };
     if (cancelInfo) data.cancelInfo = cancelInfo;
     if (payFinishInfos) data.payFinishInfos = payFinishInfos;
