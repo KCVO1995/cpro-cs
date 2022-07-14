@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-07-02 19:13:49
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 17:08:38
+ * :date last edited: 2022-07-14 18:37:15
  */
 'use strict';
 const Yhsd = require('yhsd-api');
@@ -49,5 +49,8 @@ module.exports = {
   },
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  },
+  getTime(date) {
+    return date ? new Date(date).getTime() : '';
   },
 };

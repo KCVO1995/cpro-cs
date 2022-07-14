@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 17:59:17
+ * :date last edited: 2022-07-14 19:11:48
  */
 /*
  * :file description:
@@ -35,7 +35,7 @@ class OrderController extends Controller {
     const { ctx } = this;
 
     try {
-      // await ctx.service.order.updateOne(ctx.request.body);
+      await ctx.service.order.updateOne(ctx.request.body);
       ctx.status = 200;
     } catch (e) {
       ctx.status = 400;
@@ -55,7 +55,17 @@ class OrderController extends Controller {
     const { ctx } = this;
 
     try {
-      await ctx.service.order.deliverOne(ctx.request.body)
+      await ctx.service.order.deliverOne(ctx.request.body);
+      ctx.status = 200;
+    } catch (e) {
+      ctx.status = 400;
+    }
+  }
+  async paid() {
+    const { ctx } = this;
+
+    try {
+      await ctx.service.order.paid(ctx.request.body);
       ctx.status = 200;
     } catch (e) {
       ctx.status = 400;
