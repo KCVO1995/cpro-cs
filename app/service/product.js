@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 16:05:30
+ * :date last edited: 2022-07-14 16:40:15
  */
 'use strict';
 const Service = require('egg').Service;
@@ -13,7 +13,7 @@ const async = require('async');
 const { APIS } = require('../constants/index');
 
 class ProductService extends Service {
-  async getYhsdSkuId(variant) {
+  getYhsdSkuId(variant) {
     return variant.barcode || variant.id;
   }
   async getSpecInfoList(options) {
@@ -96,7 +96,7 @@ class ProductService extends Service {
           if (_skuSpecValueList.length > 0) {
             cb(null, {
               skuStockNum: variant.stock > 0 ? variant.stock : 0,
-              outerSkuCode: variant.id,
+              outerSkuCode: this.getYhsdSkuId(variant),
               salePrice: variant.price,
               skuSpecValueList: _skuSpecValueList,
             });
@@ -107,13 +107,23 @@ class ProductService extends Service {
     });
   }
   async getGoodByProduct(product) {
-    const { ctx } = this;
+    const { ctx, app } = this;
+    const {
+      config: {
+        shopInfo: {
+          goodsTemplateId,
+          deliveryId,
+          deliveryNodeShipId,
+          templateId,
+        },
+      },
+    } = app;
     const good = {
       deductStockType: 2,
       categoryId: 43,
       subTitle: product.short_desc.substr(0, 60),
       goodsType: 1,
-      goodsTemplateId: 1192643230695,
+      goodsTemplateId,
       isCanSell: true,
       isMultiSku: true,
       isOnline: product.visibility,
@@ -123,10 +133,10 @@ class ProductService extends Service {
       performanceWay: {
         deliveryList: [
           {
-            deliveryId: 10001295124,
-            deliveryNodeShipId: 2907478,
+            deliveryId,
+            deliveryNodeShipId,
             deliveryType: 1,
-            templateId: 10000985155,
+            templateId,
           },
         ],
       },

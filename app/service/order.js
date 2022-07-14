@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 16:03:29
+ * :date last edited: 2022-07-14 16:10:05
  */
 'use strict';
 // app/service/user.js
@@ -158,8 +158,10 @@ class OrderService extends Service {
       },
       payInfo: {
         payAmount: order.total_amount,
-        totalAmount: order.total_amount + order.discount_amount,
-        totalDiscountAmount: order.discount_amount,
+        totalAmount: order.total_amount,
+        totalDiscountAmount: 0,
+        // totalAmount: order.total_amount + order.discount_amount,
+        // totalDiscountAmount: order.discount_amount,
         shouldPayAmount: order.total_amount,
         amountInfos: [
           {

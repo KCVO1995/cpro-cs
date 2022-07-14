@@ -5,19 +5,19 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:05:35
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-29 22:53:22
+ * :date last edited: 2022-07-14 16:28:50
  */
 'use strict';
 
 module.exports = app => {
-  const { DATE, INTEGER, BIGINT } = app.Sequelize;
+  const { DATE, INTEGER, BIGINT, STRING } = app.Sequelize;
 
   const SkuId = app.model.define(
     'sku_ids',
     {
       id: { type: INTEGER, primaryKey: true, autoIncrement: true },
       w_sku_id: { type: BIGINT, unique: true },
-      yhsd_sku_id: { type: BIGINT, unique: true },
+      yhsd_sku_id: { type: STRING, unique: true },
       product_id: { type: INTEGER },
       created_at: DATE(6),
       updated_at: DATE(6),
