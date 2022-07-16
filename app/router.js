@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 22:48:31
+ * :date last edited: 2022-07-16 20:15:35
  */
 'use strict';
 
@@ -34,8 +34,14 @@ module.exports = app => {
   router.post('/order/achieved', controller.order.update);
   // webhook 取消订单
   router.post('/order/cancelled', controller.order.update);
-  // // webhook 退单请求
-  // router.post('/order/request_refund', controller.customer.update);
+  // webhook 创建售后单
+  router.post('/after_sales/create', controller.afterSale.create);
+  // // webhook 取消售后单
+  // router.post('/after_sales/cancel', controller.afterSale.cancel);
+  // // webhook 更新售后单
+  // router.post('/after_sales/update', controller.afterSale.update);
+  // webhook 退单请求
+  // router.post('/order/request_refund', controller.afterSale.create);
   // // webhook 退单完成
   // router.post('/order/refunded', controller.customer.update);
   // // webhook 拒绝退单

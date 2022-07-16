@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:38:40
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 18:00:56
+ * :date last edited: 2022-07-16 22:30:22
  */
 
 'use strict';
@@ -20,7 +20,8 @@ const APIS = {
   UPDATE_ORDER:
     'https://dopen.weimob.com/apigw/weimob_shop/v2.0/order/omni/update',
   CANCEL_ORDER: 'https://dopen.weimob.com/apigw/weimob_shop/v2.0/order/cancel',
-  DELIVER_ORDER: 'https://dopen.weimob.com/apigw/weimob_shop/v2.0/fulfill/logistics/update',
+  IMPORT_AFTER_SALE: 'https://dopen.weimob.com/apigw/weimob_shop/v2.0/rights/omni/import',
+  GET_ORDER: 'https://dopen.weimob.com/apigw/weimob_shop/v2.0/order/detail/get',
   IMPORT_PRODUCT:
     'https://dopen.weimob.com/apigw/weimob_shop/v2.0/goods/create',
   UPDATE_PRODUCT:

@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-07-02 19:13:49
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 18:37:15
+ * :date last edited: 2022-07-16 23:50:24
  */
 'use strict';
 const Yhsd = require('yhsd-api');
@@ -47,10 +47,15 @@ module.exports = {
       return res.product;
     });
   },
+  getYhsdOrder(orderId) {
+    return openApi.get(`/orders/${orderId}`).then(res => {
+      return res.order;
+    });
+  },
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   },
   getTime(date) {
-    return date ? new Date(date).getTime() : '';
+    return new Date(date || '2000-01-01').getTime();
   },
 };
