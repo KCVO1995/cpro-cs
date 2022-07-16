@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 22:25:30
+ * :date last edited: 2022-07-14 22:48:31
  */
 'use strict';
 
@@ -33,7 +33,7 @@ module.exports = app => {
   // webhook 订单完成
   router.post('/order/achieved', controller.order.update);
   // webhook 取消订单
-  router.post('/order/cancelled', controller.order.cancel);
+  router.post('/order/cancelled', controller.order.update);
   // // webhook 退单请求
   // router.post('/order/request_refund', controller.customer.update);
   // // webhook 退单完成

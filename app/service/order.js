@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 22:31:16
+ * :date last edited: 2022-07-14 22:54:27
  */
 'use strict';
 // app/service/user.js
@@ -15,6 +15,7 @@ const { APIS } = require('../constants/index');
 
 // TODO 优惠金额存在问题
 // TODO 添加商品完成后需要延时一会, 导入商品后，立刻导入订单会出现 skuId 不存在
+// TODO 无法同步取消信息
 class OrderService extends Service {
   getOrderStatus(order) {
     if (order.status === 'cancel') return 9; // 已取消
@@ -63,7 +64,9 @@ class OrderService extends Service {
       // 完成时间
       timeList.push({ type: 107, value: ctx.helper.getTime(order.updated_at) });
     }
-
+    if (order.status === 'cancel') {
+      timeList.push({ type: 108, value: ctx.helper.getTime(order.close_at) });
+    }
     return timeList;
   }
   getCancelInfo(order) {
@@ -191,7 +194,6 @@ class OrderService extends Service {
     const itemInfoList = await async.map(order.items, (item, cb) => {
       ctx.model.Product.getIdByYhsdId(item.product_id)
         .then(id => {
-          console.log(id, 'ppppp id');
           if (id) return id;
           return ctx.helper.getYhsdProduct(item.product_id).then(product => {
             return ctx.service.product
@@ -314,7 +316,7 @@ class OrderService extends Service {
   }
 
   async updateOne(order) {
-    const { ctx, app } = this;
+    const { ctx } = this;
     const access_token = await ctx.service.token.get();
     const orderNo = await this.getOrderNo(order);
     const timeList = this.getTimeList(order);
@@ -335,79 +337,6 @@ class OrderService extends Service {
       .curl(`${APIS.UPDATE_ORDER}?accesstoken=${access_token}`, {
         method: 'POST',
         data,
-        contentType: 'json',
-        dataType: 'json',
-      })
-      .then(res => {
-        const { code } = res.data;
-        if (code.errcode === '0') {
-          return true;
-        }
-        return Promise.reject(res);
-      });
-  }
-  // TODO 无法同步取消信息
-  async cancelOne(order) {
-    const { ctx } = this;
-    const access_token = await ctx.service.token.get();
-    const orderNo = await this.getOrderNo(order);
-
-    return ctx
-      .curl(`${APIS.CANCEL_ORDER}?accesstoken=${access_token}`, {
-        method: 'POST',
-        data: {
-          cancelReason: '客户取消订单',
-          orderNo,
-          specificCancelReason: '客户取消订单',
-        },
-        contentType: 'json',
-        dataType: 'json',
-      })
-      .then(res => {
-        const { code } = res.data;
-        if (code.errcode === '0') {
-          return true;
-        }
-        return Promise.reject(res);
-      });
-  }
-  // {"code":{"errcode":"00145037020040003","errmsg":"[发货失败]履约父单不存在","globalTicket":"29452-1657794616.433-saas-w1-455-47695573803","monitorTrackId":"2de1ce9f-6ba2-457a-a4a2-04a7b2b61549"},"data":null}
-  async deliverOne(order) {
-    const { ctx, app } = this;
-    const access_token = await ctx.service.token.get();
-    const orderNo = await ctx.model.Order.getWidByYhsdId(order.id);
-
-    const fulfillItems = [];
-    order.shipments.forEach(shipment => {
-      fulfillItems.push({
-        orderItemId: orderNo,
-        skuNum: shipment.items.length,
-      });
-    });
-
-    return ctx
-      .curl(`${APIS.DELIVER_ORDER}?accesstoken=${access_token}`, {
-        method: 'POST',
-        data: {
-          logistics: {
-            deliveryNo: 'SF365546724374',
-            deliveryCompanyCode: 'shunfeng',
-            deliveryCompanyName: '顺丰速运',
-          },
-          orderNo,
-          isSplitPackage: order.shipments.length > 1,
-          fulfillMethod: 1,
-          fulfillItems,
-          operatorVo: {
-            operatorId: '10037478263',
-            operatorName: '管理员',
-            operatorPhone: '17344429467',
-          },
-          basicInfo: {
-            vid: app.config.shopInfo.vid,
-            vidType: 10,
-          },
-        },
         contentType: 'json',
         dataType: 'json',
       })

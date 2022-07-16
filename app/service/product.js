@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 16:40:15
+ * :date last edited: 2022-07-14 23:25:39
  */
 'use strict';
 const Service = require('egg').Service;
@@ -62,6 +62,7 @@ class ProductService extends Service {
           if (variant[key]) {
             const yhsd_option_id = options[i - 1].id;
             const yhsd_option_values = options[i - 1].values;
+            // TODO 友好坑爹
             if (yhsd_option_id && yhsd_option_values.includes(variant[key])) {
               ctx.model.Spec.getIdByYhsdId(yhsd_option_id)
                 .then(spec_id => {
