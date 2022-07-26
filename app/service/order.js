@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-16 23:47:00
+ * :date last edited: 2022-07-26 23:37:43
  */
 'use strict';
 // app/service/user.js
@@ -18,13 +18,19 @@ const { APIS } = require('../constants/index');
 // TODO 无法同步取消信息
 class OrderService extends Service {
   getOrderStatus(order) {
-    if (order.status === 'cancel') return 9; // 已取消
+    if (order.status === 'cancel' || order.status === 'refunded') return 9; // 已取消
     if (order.status === 'achieved') return 8; // 已完成
     if (order.status === 'processing') {
       if (order.payment_status === 'pending') return 0; // 创建未付款
-      if (order.payment_status === 'paid') { // 创建已付款
+      if (order.payment_status === 'paid') {
+        // 创建已付款
         if (order.shipment_status === 'pending') return 3; // 待发货
-        if (order.shipment_status === 'sending') return 5; // 已发货
+        if (
+          order.shipment_status === 'sending' ||
+          order.shipment_status === 'partial'
+        ) {
+          return 5;
+        } // 已发货
         if (order.shipment_status === 'recieved') return 7; // 已发货
         return 2;
       }
@@ -43,11 +49,19 @@ class OrderService extends Service {
       timeList.push({ type: 102, value: ctx.helper.getTime(order.pay_at) });
       timeList.push({ type: 103, value: ctx.helper.getTime(order.pay_at) });
     }
-    if (order.shipments.length > 0 && order.shipment_status === 'sending') {
+    if (
+      order.shipments.length > 0 &&
+      (order.shipment_status === 'sending' ||
+        order.shipment_status === 'partial')
+    ) {
       // 首次发货时间
       timeList.push({
         type: 104,
         value: ctx.helper.getTime(order.shipments[0].created_at),
+      });
+      timeList.push({
+        type: 105,
+        value: ctx.helper.getTime(order.shipments[0].updated_at),
       });
     }
     if (order.shipments.length > 0 && order.shipment_status === 'recieved') {
@@ -65,7 +79,6 @@ class OrderService extends Service {
       });
     }
     if (order.status === 'achieved') {
-      // 完成时间
       timeList.push({ type: 107, value: ctx.helper.getTime(order.updated_at) });
     }
     if (order.status === 'cancel') {
@@ -83,36 +96,83 @@ class OrderService extends Service {
     }
     return null;
   }
-  getDeliveryInfo(order) {
+  getReceiveInfo(order) {
     const { address } = order;
     return {
-      deliveryType: 1,
-      receiveInfo: {
-        addressInfo: {
-          address: address.complete_address,
-          province: address.province,
-          area: address.district || '未知',
-          city: address.city,
-          county: address.country || '中国',
-          zip: address.zipcode || '111111',
-          addressExt: {
-            areaCode: address.district_code,
-            cityCode: address.city_code,
-            countyCode: '500101',
-            provinceCode: address.province_code,
-          },
-        },
-        receiverInfo: {
-          receiverMobile: address.mobile,
-          receiverName: address.name,
+      addressInfo: {
+        address: address.complete_address,
+        province: address.province,
+        area: address.district || '未知',
+        city: address.city,
+        county: address.country || '中国',
+        zip: address.zipcode || '111111',
+        addressExt: {
+          areaCode: address.district_code,
+          cityCode: address.city_code,
+          countyCode: '500101',
+          provinceCode: address.province_code,
         },
       },
-      sendInfo: {
-        senderMobile: '17344429467', // TODO
-        senderName: 'cpro',
+      receiverInfo: {
+        receiverMobile: address.mobile,
+        receiverName: address.name,
       },
-      packageList: [],
     };
+  }
+  getSendInfo() {
+    return {
+      senderMobile: '17344429467', // TODO
+      senderName: 'cpro',
+    };
+  }
+  getPackageList(order) {
+    const { ctx } = this;
+    const { shipment_status, shipments } = order;
+    const receiveInfo = this.getReceiveInfo(order);
+    const sendInfo = this.getSendInfo(order);
+    if (shipment_status !== 'pending') {
+      const packageList = [];
+      shipments.forEach((shipment, index) => {
+        const packageItems = [];
+        shipment.items.forEach(item => {
+          packageItems.push({
+            outItemId: ctx.service.product.getYhsdSkuId(item),
+            skuNum: item.quantity,
+          });
+        });
+        packageList.push({
+          deliveryImportInfo: {
+            companyCode: 'shunfeng',
+            companyName: '顺丰速运',
+            expectReceivedType: 5,
+            expectReceivedTypeName: '尽快送达',
+            number: shipment.ship_no,
+            writeOffName: 'kitty',
+          },
+          deliveryMethod: 1,
+          deliveryTime: ctx.helper.getTime(shipment.created_at),
+          packageName: `包裹${index}`,
+          receiveInfo,
+          sendInfo,
+          packageItems,
+          confirmType: 1,
+        });
+      });
+      return packageList;
+    }
+    return null;
+  }
+  getDeliveryInfo(order) {
+    const packageList = this.getPackageList(order);
+    const receiveInfo = this.getReceiveInfo(order);
+    const sendInfo = this.getSendInfo(order);
+    const deliveryInfo = {
+      deliveryType: 1,
+      receiveInfo,
+      sendInfo,
+    };
+    if (packageList) deliveryInfo.packageList = packageList;
+    return deliveryInfo;
   }
   getMerchantInfo() {
     const { app } = this;
@@ -153,13 +213,14 @@ class OrderService extends Service {
     };
   }
   getPayInfo(order) {
+    // TODO 只同步商品金额，没同步运费
+    const total = order.item_amount;
     return {
-      payAmount: order.total_amount,
-      totalAmount: order.total_amount,
+      payAmount: total,
+      totalAmount: total,
       totalDiscountAmount: 0,
-      // totalAmount: order.total_amount + order.discount_amount,
       // totalDiscountAmount: order.discount_amount,
-      shouldPayAmount: order.total_amount,
+      shouldPayAmount: total,
       amountInfos: [
         {
           // 商品金额
@@ -168,13 +229,13 @@ class OrderService extends Service {
           payAmount: order.item_amount,
           shouldPayAmount: order.item_amount,
         },
-        {
-          // 运费
-          type: 250,
-          amount: order.shipment_amount,
-          payAmount: order.shipment_amount,
-          shouldPayAmount: order.shipment_amount,
-        },
+        // {
+        //   // 运费
+        //   type: 250,
+        //   amount: order.shipment_amount,
+        //   payAmount: order.shipment_amount,
+        //   shouldPayAmount: order.shipment_amount,
+        // },
       ],
     };
   }
@@ -207,10 +268,10 @@ class OrderService extends Service {
           });
         })
         .then(() => {
-          return ctx.model.SkuId.getWidByYhsdId(item.barcode || item.variant_id);
+          const skuId = ctx.service.product.getYhsdSkuId(item);
+          return ctx.model.SkuId.getWidByYhsdId(skuId);
         })
         .then(wSkuId => {
-          console.log(wSkuId, 'wSkuId');
           if (wSkuId) {
             const price = item.price * item.quantity;
             cb(null, {
@@ -218,10 +279,11 @@ class OrderService extends Service {
               goodsInfo: {
                 salePrice: item.price,
                 skuId: wSkuId,
+                skuCode: wSkuId,
                 skuNum: item.quantity,
                 goodsSellMode: 1,
               },
-              outItemId: item.id,
+              outItemId: ctx.service.product.getYhsdSkuId(item),
               payInfo: {
                 payAmount: price,
                 totalAmount: price,
@@ -282,11 +344,10 @@ class OrderService extends Service {
     const {
       outputInfo: { orderNo },
     } = orderData;
-    ctx.model.Order.create({
+    return ctx.model.Order.create({
       yhsd_order: yhsdOrderId,
       w_order: orderNo,
     });
-    return 'ok';
   }
   async importOne(order) {
     const { ctx } = this;

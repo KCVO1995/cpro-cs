@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 17:44:26
+ * :date last edited: 2022-07-26 14:40:26
  */
 'use strict';
 const Service = require('egg').Service;
@@ -31,7 +31,7 @@ class CustomerService extends Service {
       user.phone = customer.reg_identity;
     }
     if (customer.reg_type === 'social') {
-      user.openId = customer.reg_identity;
+      user.unionId = customer.unionid;
       user.appId = 'wx377d010f474c10ad';
     }
     return user;
@@ -59,8 +59,7 @@ class CustomerService extends Service {
           ) {
             const errorList = data.errorList;
             if (errorList.length > 0 && errorList[0].wid) {
-              this.afterImportOne(customer, errorList[0].wid);
-              return 'ok';
+              return this.afterImportOne(customer, errorList[0].wid);
             }
             return Promise.reject(res.data);
           }
