@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-16 20:15:35
+ * :date last edited: 2022-07-26 23:54:13
  */
 'use strict';
 
@@ -34,8 +34,10 @@ module.exports = app => {
   router.post('/order/achieved', controller.order.update);
   // webhook 取消订单
   router.post('/order/cancelled', controller.order.update);
-  // webhook 创建售后单
-  router.post('/after_sales/create', controller.afterSale.create);
+  // webhook 订单部分发货
+  router.post('/order/partially_delivered', controller.order.update);
+  // // webhook 创建售后单
+  // router.post('/after_sales/create', controller.afterSale.create);
   // // webhook 取消售后单
   // router.post('/after_sales/cancel', controller.afterSale.cancel);
   // // webhook 更新售后单
@@ -46,8 +48,6 @@ module.exports = app => {
   // router.post('/order/refunded', controller.customer.update);
   // // webhook 拒绝退单
   // router.post('/order/refuse_refund', controller.customer.update);
-  // // webhook 订单部分发货
-  // router.post('/order/partially_delivered', controller.customer.update);
   // webhook 更新订单
   // router.post('/order/update', controller.order.update);
 };

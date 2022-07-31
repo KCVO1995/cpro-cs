@@ -31,7 +31,7 @@ module.exports = () => {
   const config = exports = {};
 
   config.sequelize = {
-    database: 'cs_test',
+    database: 'cs_production',
     dialect: 'mysql',
     host: 'localhost',
     password: 'kcvo',
