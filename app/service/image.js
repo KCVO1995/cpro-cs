@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-26 16:36:48
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-28 15:40:54
+ * :date last edited: 2022-08-02 00:04:36
  */
 'use strict';
 const Service = require('egg').Service;
@@ -49,6 +49,7 @@ class ImageService extends Service {
         method: 'POST',
         dataType: 'json',
         files: pathName,
+        timeout: 200000, // 10s
         data: {
           name: fileName,
         },
