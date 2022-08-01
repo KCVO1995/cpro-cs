@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-26 17:28:28
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 17:04:15
+ * :date last edited: 2022-08-01 00:02:09
  */
 /*
  * :file description:
@@ -35,7 +35,7 @@ class SpecService extends Service {
           },
           categoryId: app.config.shopInfo.categoryId,
           specId,
-          specValueName,
+          specValueName: specValueName || '空',
         },
         contentType: 'json',
         dataType: 'json',

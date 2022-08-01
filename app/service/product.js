@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 23:25:39
+ * :date last edited: 2022-07-31 23:58:55
  */
 'use strict';
 const Service = require('egg').Service;
@@ -171,7 +171,9 @@ class ProductService extends Service {
       good.specInfoList = await this.getSpecInfoList(product.options);
     }
     if (product.variants.length > 0) {
-      good.skuList = await (await this.getSkuList(product.variants, product.options)).filter(item => !!item);
+      good.skuList = await (
+        await this.getSkuList(product.variants, product.options)
+      ).filter(item => !!item);
     }
     return good;
   }
@@ -237,28 +239,33 @@ class ProductService extends Service {
   }
   async importOne(product) {
     const { ctx, app } = this;
-    const access_token = await ctx.service.token.get();
-    const good = await this.getGoodByProduct(product);
-    return ctx
-      .curl(`${APIS.IMPORT_PRODUCT}?accesstoken=${access_token}`, {
-        method: 'POST',
-        data: {
-          basicInfo: {
-            vid: app.config.shopInfo.vid,
+    try {
+      const access_token = await ctx.service.token.get();
+      const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
+      if (wProductId) return Promise.reject(new Error('商品已存在'));
+      const good = await this.getGoodByProduct(product);
+      return ctx
+        .curl(`${APIS.IMPORT_PRODUCT}?accesstoken=${access_token}`, {
+          method: 'POST',
+          data: {
+            basicInfo: {
+              vid: app.config.shopInfo.vid,
+            },
+            ...good,
           },
-          ...good,
-        },
-        contentType: 'json',
-        dataType: 'json',
-      })
-      .then(res => {
-        const { code, data } = res.data;
-        if (code.errcode === '0') {
-          return this.afterImportOne(data, product);
-        }
-        return Promise.reject(res.data);
-
-      });
+          contentType: 'json',
+          dataType: 'json',
+        })
+        .then(res => {
+          const { code, data } = res.data;
+          if (code.errcode === '0') {
+            return this.afterImportOne(data, product);
+          }
+          return Promise.reject(new Error(code.errmsg));
+        });
+    } catch (e) {
+      return Promise.reject(new Error('同步错误'));
+    }
   }
   async updateOne(product) {
     const { ctx, app } = this;
