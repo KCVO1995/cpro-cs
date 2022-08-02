@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 22:32:41
+ * :date last edited: 2022-08-03 00:01:22
  */
 'use strict';
 const Service = require('egg').Service;
@@ -34,7 +34,7 @@ class CustomerService extends Service {
   }
   async getUserByCustomer(customer) {
     const user = {
-      userName: customer.name,
+      userName: customer.name.substr(0, 20),
       appChannel: 3,
       userKey: 1,
       belongVidName: 'Collegepro',
