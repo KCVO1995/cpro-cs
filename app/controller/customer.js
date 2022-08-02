@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 15:00:53
+ * :date last edited: 2022-08-02 22:35:47
  */
 'use strict';
 
@@ -19,12 +19,13 @@ class CustomerController extends Controller {
   async create() {
     const { ctx } = this;
     try {
-      await ctx.service.customer.importOne(ctx.request.body);
+      const result = await ctx.service.customer.importOne(ctx.request.body);
       ctx.status = 200;
+      if (result === '客户已同步') ctx.body = { message: result };
     } catch (e) {
       ctx.status = 400;
+      ctx.body = { message: e.message };
     }
-
   }
   async update() {
     const { ctx } = this;

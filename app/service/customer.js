@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 15:17:51
+ * :date last edited: 2022-08-02 22:32:41
  */
 'use strict';
 const Service = require('egg').Service;
@@ -56,6 +56,9 @@ class CustomerService extends Service {
   async importOne(customer) {
     const { ctx } = this;
     const access_token = await ctx.service.token.get();
+    const wid = await ctx.model.Customer.getWidByYhsdId(customer.id);
+    if (wid) return Promise.resolve('客户已同步');
+    if (customer.reg_type === 'email') return Promise.reject(new Error('客户使用邮箱注册'));
     const user = await this.getUserByCustomer(customer);
     return ctx
       .curl(`${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`, {

@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 22:01:37
+ * :date last edited: 2022-08-02 22:15:37
  */
 'use strict';
 const Service = require('egg').Service;
@@ -243,7 +243,7 @@ class ProductService extends Service {
     try {
       const access_token = await ctx.service.token.get();
       const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
-      if (wProductId) return Promise.reject(new Error('商品已存在'));
+      if (wProductId) return Promise.resolve('商品已存在');
       const good = await this.getGoodByProduct(product);
       return ctx
         .curl(`${APIS.IMPORT_PRODUCT}?accesstoken=${access_token}`, {
