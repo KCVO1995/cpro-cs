@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 15:15:04
+ * :date last edited: 2022-08-02 15:17:51
  */
 'use strict';
 const Service = require('egg').Service;
@@ -30,7 +30,6 @@ class CustomerService extends Service {
         dataType: 'json',
       }
     );
-    console.log(data, 'dddd');
     return data.unionid;
   }
   async getUserByCustomer(customer) {
