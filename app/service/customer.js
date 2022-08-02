@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-29 15:04:29
+ * :date last edited: 2022-08-02 15:15:04
  */
 'use strict';
 const Service = require('egg').Service;
@@ -19,7 +19,21 @@ class CustomerService extends Service {
     });
     return 'ok';
   }
-  getUserByCustomer(customer) {
+  async getUnionIdByOPenId(openId) {
+    const { ctx } = this;
+    const token = await ctx.service.wxToken.get();
+    const { data } = await ctx.curl(
+      `${APIS.GET_WX_UNION_ID}?access_token=${token}&openid=${openId}&lang=zh_CN`,
+      {
+        method: 'POST',
+        contentType: 'json',
+        dataType: 'json',
+      }
+    );
+    console.log(data, 'dddd');
+    return data.unionid;
+  }
+  async getUserByCustomer(customer) {
     const user = {
       userName: customer.name,
       appChannel: 3,
@@ -31,7 +45,11 @@ class CustomerService extends Service {
       user.phone = customer.reg_identity;
     }
     if (customer.reg_type === 'social') {
-      user.unionId = customer.unionid;
+      if (customer.unionid) user.unionId = customer.unionid;
+      else {
+        const unionId = await this.getUnionIdByOPenId(customer.reg_identity);
+        user.unionId = unionId;
+      }
       user.appId = 'wx377d010f474c10ad';
     }
     return user;
@@ -39,7 +57,7 @@ class CustomerService extends Service {
   async importOne(customer) {
     const { ctx } = this;
     const access_token = await ctx.service.token.get();
-    const user = this.getUserByCustomer(customer);
+    const user = await this.getUserByCustomer(customer);
     return ctx
       .curl(`${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`, {
         method: 'POST',
@@ -50,29 +68,27 @@ class CustomerService extends Service {
         contentType: 'json',
         dataType: 'json',
       })
-      .then(
-        res => {
-          const { code, data } = res.data;
-          if (
-            data.errorList.length > 0 &&
-            data.errorList[0].errorMessage === '该客户已存在'
-          ) {
-            const errorList = data.errorList;
-            if (errorList.length > 0 && errorList[0].wid) {
-              return this.afterImportOne(customer, errorList[0].wid);
-            }
-            return Promise.reject(res.data);
-          }
-          if (code.errcode === '0') {
-            const successList = data.successList;
-            if (successList.length > 0 && successList[0].wid) {
-              return this.afterImportOne(customer, successList[0].wid);
-            }
-            return Promise.reject(res.data);
+      .then(res => {
+        const { code, data } = res.data;
+        if (
+          data.errorList.length > 0 &&
+          data.errorList[0].errorMessage === '该客户已存在'
+        ) {
+          const errorList = data.errorList;
+          if (errorList.length > 0 && errorList[0].wid) {
+            return this.afterImportOne(customer, errorList[0].wid);
           }
           return Promise.reject(res.data);
         }
-      );
+        if (code.errcode === '0') {
+          const successList = data.successList;
+          if (successList.length > 0 && successList[0].wid) {
+            return this.afterImportOne(customer, successList[0].wid);
+          }
+          return Promise.reject(res.data);
+        }
+        return Promise.reject(res.data);
+      });
   }
   async updateOne(customer) {
     const { ctx, app } = this;
@@ -103,8 +119,7 @@ class CustomerService extends Service {
           }
           return Promise.reject(res.data);
         },
-        e => {
-        }
+        e => {}
       );
   }
 }

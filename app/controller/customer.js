@@ -5,11 +5,10 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:17:57
+ * :date last edited: 2022-08-02 15:00:53
  */
 'use strict';
 
-// TODO 名字没同步
 const Controller = require('egg').Controller;
 
 class CustomerController extends Controller {

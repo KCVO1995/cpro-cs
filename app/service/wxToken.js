@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-08-02 00:20:22
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 14:59:40
+ * :date last edited: 2022-08-02 15:12:20
  */
 /*
  * :file description:
@@ -35,7 +35,7 @@ class WxTokenService extends Service {
   async get() {
     const { ctx } = this;
     const { dataValues: data } = (await ctx.model.WxToken.findOne()) || {};
-    if (!data.token || (data && data.token_expires < new Date().getTime())) {
+    if (!data || !data.token || (data && data.token_expires < new Date().getTime())) {
       await ctx.model.WxToken.destroy({ where: {} });
       const token = await this.getToken();
       await ctx.model.WxToken.create({ token });
