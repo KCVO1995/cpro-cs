@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 14:56:53
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 16:28:34
+ * :date last edited: 2022-08-02 13:49:23
  */
 'use strict';
 
@@ -16,7 +16,7 @@ module.exports = {
     await queryInterface.createTable('sku_ids', {
       id: { type: INTEGER, primaryKey: true, autoIncrement: true },
       w_sku_id: { type: BIGINT, unique: true },
-      yhsd_sku_id: { type: STRING, unique: true },
+      yhsd_sku_id: { type: STRING },
       product_id: { type: INTEGER },
       created_at: DATE(6),
       updated_at: DATE(6),
