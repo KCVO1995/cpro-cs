@@ -5,10 +5,12 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 20:54:32
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-06-30 10:57:07
+ * :date last edited: 2022-08-02 14:48:06
  */
 'use strict';
 // app.js
+const dotenv = require('dotenv');
+dotenv.config();
 
 class AppBootHook {
   constructor(app) {
@@ -42,6 +44,7 @@ class AppBootHook {
     // 此时可以从 app.server 拿到 server 的实例
     const ctx = await this.app.createAnonymousContext();
     await ctx.service.token.get(false);
+    await ctx.service.wxToken.get();
 
     // TODO 友好请求日志
     this.app.httpclient.on('response', result => {

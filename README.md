@@ -48,4 +48,9 @@ CREATE DATABASE cs_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE cs_production CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
+查表头
+```bash
+show columns from sku_ids;
+```
+
 [egg]: https://eggjs.org

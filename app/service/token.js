@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-19 19:01:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-03 17:08:38
+ * :date last edited: 2022-08-02 14:48:57
  */
 'use strict';
 const Service = require('egg').Service;
@@ -26,7 +26,6 @@ class TokenService extends Service {
         dataType: 'json',
       }
     );
-    console.log('获取 token ------ ', res.data);
     const { data: { expires_in, access_token } } = res;
     ctx.model.Token.destroy({ where: { shop_id: app.config.shopInfo.shopId } });
     await ctx.model.Token.create({ shop_id: app.config.shopInfo.shopId, access_token });
