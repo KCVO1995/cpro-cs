@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-26 23:37:43
+ * :date last edited: 2022-08-02 10:18:01
  */
 'use strict';
 // app/service/user.js
@@ -267,9 +267,10 @@ class OrderService extends Service {
               .then(() => ctx.helper.sleep(800));
           });
         })
-        .then(() => {
+        .then(productId => {
+          console.log(productId, '----必须要获取到 productId----'); // TODO
           const skuId = ctx.service.product.getYhsdSkuId(item);
-          return ctx.model.SkuId.getWidByYhsdId(skuId);
+          return ctx.model.SkuId.getWidByYhsdId(skuId, productId);
         })
         .then(wSkuId => {
           if (wSkuId) {

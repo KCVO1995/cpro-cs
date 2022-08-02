@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:05:35
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-14 16:28:50
+ * :date last edited: 2022-08-02 10:39:02
  */
 'use strict';
 
@@ -17,7 +17,7 @@ module.exports = app => {
     {
       id: { type: INTEGER, primaryKey: true, autoIncrement: true },
       w_sku_id: { type: BIGINT, unique: true },
-      yhsd_sku_id: { type: STRING, unique: true },
+      yhsd_sku_id: { type: STRING },
       product_id: { type: INTEGER },
       created_at: DATE(6),
       updated_at: DATE(6),
@@ -38,10 +38,11 @@ module.exports = app => {
     return c.length > 0 ? c : [];
   };
 
-  SkuId.getWidByYhsdId = async function(yhsd_sku_id) {
+  SkuId.getWidByYhsdId = async function(yhsd_sku_id, product_id) {
     const c = await this.findOne({
       where: {
         yhsd_sku_id,
+        product_id,
       },
     });
     if (c && c.dataValues && c.dataValues.w_sku_id) {

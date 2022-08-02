@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-31 23:58:55
+ * :date last edited: 2022-08-02 10:17:12
  */
 'use strict';
 const Service = require('egg').Service;
@@ -194,6 +194,7 @@ class ProductService extends Service {
           });
         });
       }
+      return dataValues.id;
     });
   }
   async afterUpdateOne(data, product) {
