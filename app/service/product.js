@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 21:31:17
+ * :date last edited: 2022-08-02 22:01:37
  */
 'use strict';
 const Service = require('egg').Service;
@@ -72,7 +72,7 @@ class ProductService extends Service {
                   );
                 })
                 .then(specValueItem => {
-                  if (specValueItem.w_spec_value_id) {
+                  if (specValueItem && specValueItem.w_spec_value_id) {
                     if (specValueItem.spec.dataValues) {
                       cb2(null, {
                         specId: specValueItem.spec.dataValues.w_spec_id,
