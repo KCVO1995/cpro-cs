@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-18 15:07:42
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-16 17:42:16
+ * :date last edited: 2022-08-03 22:15:38
  */
 /*
  * :file description:
@@ -25,10 +25,12 @@ class OrderController extends Controller {
     const { ctx } = this;
 
     try {
-      await ctx.service.order.importOne(ctx.request.body);
+      const result = await ctx.service.order.importOne(ctx.request.body);
       ctx.status = 200;
+      if (result === '订单已存在') ctx.body = { message: result };
     } catch (e) {
       ctx.status = 400;
+      ctx.body = { message: e.message };
     }
   }
   async update() {

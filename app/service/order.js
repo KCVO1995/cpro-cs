@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 10:18:01
+ * :date last edited: 2022-08-03 22:56:54
  */
 'use strict';
 // app/service/user.js
@@ -262,13 +262,13 @@ class OrderService extends Service {
         .then(id => {
           if (id) return id;
           return ctx.helper.getYhsdProduct(item.product_id).then(product => {
-            return ctx.service.product
-              .importOne(product)
-              .then(() => ctx.helper.sleep(800));
+            return ctx.service.product.importOne(product).then(() => {
+              ctx.helper.sleep(800);
+              return ctx.model.Product.getIdByYhsdId(item.product_id);
+            });
           });
         })
         .then(productId => {
-          console.log(productId, '----必须要获取到 productId----'); // TODO
           const skuId = ctx.service.product.getYhsdSkuId(item);
           return ctx.model.SkuId.getWidByYhsdId(skuId, productId);
         })
@@ -351,26 +351,33 @@ class OrderService extends Service {
     });
   }
   async importOne(order) {
-    const { ctx } = this;
-    const access_token = await ctx.service.token.get();
-    const orderInfo = await this.getOrderInfo(order);
+    try {
+      const { ctx } = this;
+      const orderNo = await ctx.model.Order.getWidByYhsdId(order.id);
+      if (orderNo) return Promise.resolve('订单已存在');
 
-    return ctx
-      .curl(`${APIS.IMPORT_ORDER}?accesstoken=${access_token}`, {
-        method: 'POST',
-        data: {
-          orderInfo,
-        },
-        contentType: 'json',
-        dataType: 'json',
-      })
-      .then(res => {
-        const { code, data } = res.data;
-        if (code.errcode === '0') {
-          return this.afterImportOne(order.id, data);
-        }
-        return Promise.reject(res);
-      });
+      const access_token = await ctx.service.token.get();
+      const orderInfo = await this.getOrderInfo(order);
+
+      return ctx
+        .curl(`${APIS.IMPORT_ORDER}?accesstoken=${access_token}`, {
+          method: 'POST',
+          data: {
+            orderInfo,
+          },
+          contentType: 'json',
+          dataType: 'json',
+        })
+        .then(res => {
+          const { code, data } = res.data;
+          if (code.errcode === '0') {
+            return this.afterImportOne(order.id, data);
+          }
+          return Promise.reject(new Error(code.errmsg));
+        });
+    } catch (e) {
+      return Promise.reject(e || '订单导入失败');
+    }
   }
   async getOrderNo(order) {
     const { ctx } = this;

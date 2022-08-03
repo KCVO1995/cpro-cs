@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 22:15:37
+ * :date last edited: 2022-08-03 23:10:26
  */
 'use strict';
 const Service = require('egg').Service;
@@ -222,19 +222,19 @@ class ProductService extends Service {
 
     // 已被弃用的 skuList
     const wSkuIdList = data.skuList.map(item => item.skuId);
-    const yhsdSkuIdList = product.variants.map(item => item.id);
+    const yhsdSkuIdList = product.variants.map(item => this.getYhsdSkuId(item));
     const unMatchSkuIdList = dbSkuList.filter(
       item =>
         item.product_id === productId &&
         (!yhsdSkuIdList.includes(item.yhsd_sku_id) ||
           !wSkuIdList.includes(item.w_sku_id))
     );
+    console.log(unMatchSkuIdList, 'iiiii');
     unMatchSkuIdList.forEach(item => {
       ctx.model.SkuId.destroy({
         where: {
           id: item.id,
         },
-        truncate: true,
       });
     });
   }

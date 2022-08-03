@@ -90,9 +90,9 @@ class CustomerService extends Service {
             if (successList.length > 0 && successList[0].wid) {
               return this.afterImportOne(customer, successList[0].wid);
             }
-            return Promise.reject(res.data);
+            return Promise.reject(new Error(code.errmsg));
           }
-          return Promise.reject(res.data);
+          return Promise.reject(new Error(code.errmsg));
         });
     } catch (e) {
       return Promise.reject(e || new Error('同步客户失败'));
@@ -127,7 +127,7 @@ class CustomerService extends Service {
           }
           return Promise.reject(res.data);
         },
-        e => {}
+        () => {}
       );
   }
 }
