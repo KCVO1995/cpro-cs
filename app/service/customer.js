@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-03 00:01:22
+ * :date last edited: 2022-08-03 11:37:45
  */
 'use strict';
 const Service = require('egg').Service;
@@ -34,7 +34,7 @@ class CustomerService extends Service {
   }
   async getUserByCustomer(customer) {
     const user = {
-      userName: customer.name.substr(0, 20),
+      userName: customer.name.substr(0, 20), // 微盟姓名不能超过 20
       appChannel: 3,
       userKey: 1,
       belongVidName: 'Collegepro',
@@ -48,49 +48,54 @@ class CustomerService extends Service {
       else {
         const unionId = await this.getUnionIdByOPenId(customer.reg_identity);
         user.unionId = unionId;
+        if (!unionId) return Promise.reject(new Error('unionId 为空'));
       }
       user.appId = 'wx377d010f474c10ad';
     }
     return user;
   }
   async importOne(customer) {
-    const { ctx } = this;
-    const access_token = await ctx.service.token.get();
-    const wid = await ctx.model.Customer.getWidByYhsdId(customer.id);
-    if (wid) return Promise.resolve('客户已同步');
-    if (customer.reg_type === 'email') return Promise.reject(new Error('客户使用邮箱注册'));
-    const user = await this.getUserByCustomer(customer);
-    return ctx
-      .curl(`${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`, {
-        method: 'POST',
-        data: {
-          importType: 1,
-          userList: [ user ],
-        },
-        contentType: 'json',
-        dataType: 'json',
-      })
-      .then(res => {
-        const { code, data } = res.data;
-        if (
-          data.errorList.length > 0 &&
-          data.errorList[0].errorMessage === '该客户已存在'
-        ) {
-          const errorList = data.errorList;
-          if (errorList.length > 0 && errorList[0].wid) {
-            return this.afterImportOne(customer, errorList[0].wid);
+    try {
+      const { ctx } = this;
+      const access_token = await ctx.service.token.get();
+      const wid = await ctx.model.Customer.getWidByYhsdId(customer.id);
+      if (wid) return Promise.resolve('客户已同步');
+      if (customer.reg_type === 'email') return Promise.reject(new Error('客户使用邮箱注册'));
+      const user = await this.getUserByCustomer(customer);
+      return ctx
+        .curl(`${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`, {
+          method: 'POST',
+          data: {
+            importType: 1,
+            userList: [ user ],
+          },
+          contentType: 'json',
+          dataType: 'json',
+        })
+        .then(res => {
+          const { code, data } = res.data;
+          if (
+            data.errorList.length > 0 &&
+            data.errorList[0].errorMessage === '该客户已存在'
+          ) {
+            const errorList = data.errorList;
+            if (errorList.length > 0 && errorList[0].wid) {
+              return this.afterImportOne(customer, errorList[0].wid);
+            }
+            return Promise.reject(res.data);
+          }
+          if (code.errcode === '0') {
+            const successList = data.successList;
+            if (successList.length > 0 && successList[0].wid) {
+              return this.afterImportOne(customer, successList[0].wid);
+            }
+            return Promise.reject(res.data);
           }
           return Promise.reject(res.data);
-        }
-        if (code.errcode === '0') {
-          const successList = data.successList;
-          if (successList.length > 0 && successList[0].wid) {
-            return this.afterImportOne(customer, successList[0].wid);
-          }
-          return Promise.reject(res.data);
-        }
-        return Promise.reject(res.data);
-      });
+        });
+    } catch (e) {
+      return Promise.reject(e || new Error('同步客户失败'));
+    }
   }
   async updateOne(customer) {
     const { ctx, app } = this;

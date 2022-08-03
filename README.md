@@ -53,4 +53,13 @@ CREATE DATABASE cs_production CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 show columns from sku_ids;
 ```
 
+无法同步问题
+ 商品
+  1. skuList 为空
+  2. sku 有下架状态的
+  3. 没有默认图片
+ 客户
+  1. email 注册的
+  2. 账号无法获取 unionId, 未关注公众号
+
 [egg]: https://eggjs.org
