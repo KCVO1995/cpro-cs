@@ -59,6 +59,7 @@ show columns from sku_ids;
   2. sku 有下架状态的
   3. 没有默认图片
  客户
+  0. 用户吗注册的
   1. email 注册的
   2. 账号无法获取 unionId, 未关注公众号
 
