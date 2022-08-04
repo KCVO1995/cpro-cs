@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-03 15:44:32
+ * :date last edited: 2022-08-05 00:05:08
  */
 'use strict';
 const Service = require('egg').Service;
@@ -60,8 +60,8 @@ class CustomerService extends Service {
       const access_token = await ctx.service.token.get();
       const wid = await ctx.model.Customer.getWidByYhsdId(customer.id);
       if (wid) return Promise.resolve('客户已同步');
-      if (customer.reg_type === 'email') return Promise.reject(new Error('客户使用邮箱注册'));
-      if (customer.reg_type === 'uname') return Promise.reject(new Error('客户使用用户名注册'));
+      if (customer.reg_type === 'email') { return Promise.reject(new Error('客户使用邮箱注册')); }
+      if (customer.reg_type === 'uname') { return Promise.reject(new Error('客户使用用户名注册')); }
       const user = await this.getUserByCustomer(customer);
       return ctx
         .curl(`${APIS.IMPORT_CUSTOMER}?accesstoken=${access_token}`, {
@@ -98,6 +98,7 @@ class CustomerService extends Service {
       return Promise.reject(e || new Error('同步客户失败'));
     }
   }
+  // TODO 目前只能修改名称
   async updateOne(customer) {
     const { ctx, app } = this;
     const access_token = await ctx.service.token.get();
@@ -105,7 +106,9 @@ class CustomerService extends Service {
     if (!wid) {
       return this.importOne(customer);
     }
-    const user = await this.getUserByCustomer(customer);
+    const user = {
+      userName: customer.name.substr(0, 20), // 微盟姓名不能超过 20
+    };
     return ctx
       .curl(`${APIS.UPDATE_CUSTOMER}?accesstoken=${access_token}`, {
         method: 'POST',
