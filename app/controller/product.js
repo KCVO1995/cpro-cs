@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:13:36
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-31 23:09:40
+ * :date last edited: 2022-08-05 00:02:53
  */
 /*
  * :file description:
@@ -47,6 +47,7 @@ class ProductController extends Controller {
       ctx.status = 200;
     } catch (e) {
       ctx.status = 400;
+      ctx.body = { message: e.message };
     }
   }
   async delete() {

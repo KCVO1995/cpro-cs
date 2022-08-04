@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-03 23:10:26
+ * :date last edited: 2022-08-04 23:59:23
  */
 'use strict';
 const Service = require('egg').Service;
@@ -107,7 +107,23 @@ class ProductService extends Service {
         });
     });
   }
-  async getGoodByProduct(product) {
+  // 适配 sku 下架的情况，将 sku 的 option 值补充到 product.options 上（友好的坑）
+  skuTakeDownAdapter(product) {
+    const newProduct = { ...product };
+    newProduct.variants.forEach(variant => {
+      [ 1, 2, 3 ].forEach(i => {
+        const key = `option_${i}`;
+        if (variant[key] && i <= newProduct.options.length) {
+          const option = newProduct.options[i - 1];
+          if (!option.values.includes(variant[key])) {
+            option.values.push(variant[key]);
+          }
+        }
+      });
+    });
+    return newProduct;
+  }
+  async getGoodByProduct(_product) {
     const { ctx, app } = this;
     const {
       config: {
@@ -119,6 +135,11 @@ class ProductService extends Service {
         },
       },
     } = app;
+
+    const product = this.skuTakeDownAdapter(_product);
+
+    console.log(product.options, 'oooo');
+
     const good = {
       deductStockType: 2,
       categoryId: 43,
@@ -147,6 +168,7 @@ class ProductService extends Service {
       title: product.name.substr(0, 60),
       wid: 10031336493,
     };
+
     if (product.vendor) {
       const brandId = await ctx.service.vendor.getBrandId(product.vendor);
       good.brandId = brandId;
@@ -221,22 +243,21 @@ class ProductService extends Service {
     });
 
     // 已被弃用的 skuList
-    const wSkuIdList = data.skuList.map(item => item.skuId);
-    const yhsdSkuIdList = product.variants.map(item => this.getYhsdSkuId(item));
-    const unMatchSkuIdList = dbSkuList.filter(
-      item =>
-        item.product_id === productId &&
-        (!yhsdSkuIdList.includes(item.yhsd_sku_id) ||
-          !wSkuIdList.includes(item.w_sku_id))
-    );
-    console.log(unMatchSkuIdList, 'iiiii');
-    unMatchSkuIdList.forEach(item => {
-      ctx.model.SkuId.destroy({
-        where: {
-          id: item.id,
-        },
-      });
-    });
+    // const wSkuIdList = data.skuList.map(item => item.skuId);
+    // const yhsdSkuIdList = product.variants.map(item => this.getYhsdSkuId(item));
+    // const unMatchSkuIdList = dbSkuList.filter(
+    //   item =>
+    //     item.product_id === productId &&
+    //     (!yhsdSkuIdList.includes(item.yhsd_sku_id) ||
+    //       !wSkuIdList.includes(item.w_sku_id))
+    // );
+    // unMatchSkuIdList.forEach(item => {
+    //   ctx.model.SkuId.destroy({
+    //     where: {
+    //       id: item.id,
+    //     },
+    //   });
+    // });
   }
   async importOne(product) {
     const { ctx, app } = this;
@@ -265,36 +286,40 @@ class ProductService extends Service {
           return Promise.reject(new Error(code.errmsg));
         });
     } catch (e) {
-      return Promise.reject(new Error('同步错误'));
+      return Promise.reject(e || new Error('同步错误'));
     }
   }
   async updateOne(product) {
-    const { ctx, app } = this;
-    const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
-    if (!wProductId) return this.importOne(product);
-    const access_token = await ctx.service.token.get();
-    const good = await this.getGoodByProduct(product);
-    return ctx
-      .curl(`${APIS.UPDATE_PRODUCT}?accesstoken=${access_token}`, {
-        method: 'POST',
-        data: {
-          basicInfo: {
-            vid: app.config.shopInfo.vid,
+    try {
+      const { ctx, app } = this;
+      const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
+      if (!wProductId) return this.importOne(product);
+      const access_token = await ctx.service.token.get();
+      const good = await this.getGoodByProduct(product);
+      return ctx
+        .curl(`${APIS.UPDATE_PRODUCT}?accesstoken=${access_token}`, {
+          method: 'POST',
+          data: {
+            basicInfo: {
+              vid: app.config.shopInfo.vid,
+            },
+            goodsId: wProductId,
+            ...good,
           },
-          goodsId: wProductId,
-          ...good,
-        },
-        contentType: 'json',
-        dataType: 'json',
-      })
-      .then(res => {
-        const { code, data } = res.data;
-        if (code.errcode === '0') {
-          this.afterUpdateOne(data, product);
-        } else {
-          return Promise.reject(res.data);
-        }
-      });
+          contentType: 'json',
+          dataType: 'json',
+        })
+        .then(res => {
+          const { code, data } = res.data;
+          if (code.errcode === '0') {
+            this.afterUpdateOne(data, product);
+          } else {
+            return Promise.reject(res.data);
+          }
+        });
+    } catch (e) {
+      return Promise.reject(e || new Error('更新错误'));
+    }
   }
   afterDeleteOne(wProductId) {
     const { ctx } = this;
