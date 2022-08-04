@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-04 23:59:23
+ * :date last edited: 2022-08-05 00:13:16
  */
 'use strict';
 const Service = require('egg').Service;
@@ -181,7 +181,8 @@ class ProductService extends Service {
     }
     if (product.image && product.image.src) {
       good.defaultImageUrl = await ctx.service.image.getWFileUrl(
-        product.image.src
+        product.image.src ||
+          'https://asset.ibanquan.com/image/53f649ffe2931e0b91000007/s_w453h453.png'
       );
     }
     if (product.images.length > 0) {
