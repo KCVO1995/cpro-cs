@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-26 16:36:48
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-02 00:04:36
+ * :date last edited: 2022-08-05 00:23:40
  */
 'use strict';
 const Service = require('egg').Service;
@@ -17,6 +17,7 @@ const { APIS } = require('../constants/index');
 
 class ImageService extends Service {
   async getWFileUrl(url) {
+    console.log(url, ' rr');
     const { ctx } = this;
     const wUrl = await ctx.model.Image.getWUrlByYhsdUrl(url);
     if (wUrl) return wUrl;
