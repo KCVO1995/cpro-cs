@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-03 22:56:54
+ * :date last edited: 2022-08-04 15:07:44
  */
 'use strict';
 // app/service/user.js
@@ -316,7 +316,7 @@ class OrderService extends Service {
   async getOrderInfo(order) {
     const { customer } = order;
     const wid = await this.getCustomerWid(customer);
-    const discountInfoList = this.getDiscountInfoList(order);
+    // const discountInfoList = this.getDiscountInfoList(order);
     const itemInfoList = await this.getItemInfoList(order);
     const cancelInfo = this.getCancelInfo(order);
     const deliveryInfo = this.getDeliveryInfo(order);
@@ -329,7 +329,7 @@ class OrderService extends Service {
         wid,
       },
       deliveryInfo,
-      discountInfoList,
+      // discountInfoList,
       itemInfoList,
       merchantInfo,
       orderBaseInfo,

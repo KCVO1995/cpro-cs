@@ -48,9 +48,12 @@ CREATE DATABASE cs_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE cs_production CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-查表头
+
 ```bash
+# 查表头
 show columns from sku_ids;
+# 查行数
+select count(*) from sku_ids;
 ```
 
 无法同步问题
