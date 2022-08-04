@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-05 00:27:31
+ * :date last edited: 2022-08-05 00:30:49
  */
 'use strict';
 const Service = require('egg').Service;
@@ -196,6 +196,24 @@ class ProductService extends Service {
     return good;
   }
   afterImportOne(data, product) {
+    const { ctx } = this;
+    return ctx.model.Product.create({
+      w_product_id: data.goodsId,
+      yhsd_product_id: product.id,
+    }).then(res => {
+      const { dataValues } = res;
+      if (data.skuList.length > 0) {
+        // sku
+        data.skuList.forEach((sku, index) => {
+          ctx.model.SkuId.create({
+            w_sku_id: sku.skuId,
+            yhsd_sku_id: this.getYhsdSkuId(product.variants[index]),
+            product_id: dataValues.id,
+          });
+        });
+      }
+      return dataValues.id;
+    });
   }
   async afterUpdateOne(data, product) {
     const { ctx } = this;
