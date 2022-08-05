@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-04 15:07:44
+ * :date last edited: 2022-08-05 14:31:08
  */
 'use strict';
 // app/service/user.js
@@ -18,7 +18,7 @@ const { APIS } = require('../constants/index');
 // TODO 无法同步取消信息
 class OrderService extends Service {
   getOrderStatus(order) {
-    if (order.status === 'cancel' || order.status === 'refunded') return 9; // 已取消
+    if (order.status === 'cancel' || order.status === 'refunded') return 9; // 已取消 & 已退款
     if (order.status === 'achieved') return 8; // 已完成
     if (order.status === 'processing') {
       if (order.payment_status === 'pending') return 0; // 创建未付款
@@ -81,7 +81,7 @@ class OrderService extends Service {
     if (order.status === 'achieved') {
       timeList.push({ type: 107, value: ctx.helper.getTime(order.updated_at) });
     }
-    if (order.status === 'cancel') {
+    if (order.status === 'cancel' || order.status === 'refunded') {
       timeList.push({ type: 108, value: ctx.helper.getTime(order.close_at) });
     }
     return timeList;
@@ -92,6 +92,13 @@ class OrderService extends Service {
         cancelType: 1,
         reason: '买家取消',
         specialReason: '买家取消',
+      };
+    }
+    if (order.status === 'refunded') {
+      return {
+        cancelType: 1,
+        reason: '已退款',
+        specialReason: '已退款',
       };
     }
     return null;
