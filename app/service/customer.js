@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-21 21:05:41
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-05 00:05:08
+ * :date last edited: 2022-08-05 23:33:07
  */
 'use strict';
 const Service = require('egg').Service;
@@ -44,12 +44,9 @@ class CustomerService extends Service {
       user.phone = customer.reg_identity;
     }
     if (customer.reg_type === 'social') {
-      if (customer.unionid) user.unionId = customer.unionid;
-      else {
-        const unionId = await this.getUnionIdByOPenId(customer.reg_identity);
-        user.unionId = unionId;
-        if (!unionId) return Promise.reject(new Error('unionId 为空'));
-      }
+      const unionId = await this.getUnionIdByOPenId(customer.reg_identity);
+      user.unionId = unionId;
+      if (!unionId) return Promise.reject(new Error('unionId 为空'));
       user.appId = 'wx377d010f474c10ad';
     }
     return user;
