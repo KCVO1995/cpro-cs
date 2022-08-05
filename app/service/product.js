@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-23 20:14:21
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-05 00:30:49
+ * :date last edited: 2022-08-05 16:02:34
  */
 'use strict';
 const Service = require('egg').Service;
@@ -259,6 +259,7 @@ class ProductService extends Service {
     const { ctx, app } = this;
     try {
       const access_token = await ctx.service.token.get();
+      if (!product.id) return Promise.reject(new Error('product id is empty'));
       const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
       if (wProductId) return Promise.resolve('商品已存在');
       const good = await this.getGoodByProduct(product);
@@ -288,6 +289,7 @@ class ProductService extends Service {
   async updateOne(product) {
     try {
       const { ctx, app } = this;
+      if (!product.id) return Promise.reject(new Error('product id is empty'));
       const wProductId = await ctx.model.Product.getWidByYhsdId(product.id);
       if (!wProductId) return this.importOne(product);
       const access_token = await ctx.service.token.get();
