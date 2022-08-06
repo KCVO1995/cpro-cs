@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-07-02 19:13:49
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-07-16 23:50:24
+ * :date last edited: 2022-08-06 09:48:35
  */
 'use strict';
 const Yhsd = require('yhsd-api');
@@ -57,5 +57,17 @@ module.exports = {
   },
   getTime(date) {
     return new Date(date || '2000-01-01').getTime();
+  },
+  async updateOrCreate(model, where, newItem) {
+    // First try to find the record
+    const foundItem = await model.findOne({ where });
+    if (!foundItem) {
+      // Item not found, create a new one
+      const item = await model.create(newItem);
+      return { item, created: true };
+    }
+    // Found an item, update it
+    const item = await model.update(newItem, { where });
+    return { item, created: false };
   },
 };
