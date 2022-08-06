@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-06 15:21:37
+ * :date last edited: 2022-08-06 21:11:19
  */
 'use strict';
 // app/service/user.js
@@ -367,8 +367,8 @@ class OrderService extends Service {
   async importOne(order) {
     try {
       const { ctx } = this;
-      // const orderNo = await ctx.model.Order.getWidByYhsdId(order.id);
-      // if (orderNo) return Promise.resolve('订单已存在');
+      const orderNo = await ctx.model.Order.getWidByYhsdId(order.id);
+      if (orderNo) return Promise.resolve('订单已存在');
 
       const access_token = await ctx.service.token.get();
       const orderInfo = await this.getOrderInfo(order);
