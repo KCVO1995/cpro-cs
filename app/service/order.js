@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-06 13:56:53
+ * :date last edited: 2022-08-06 15:21:37
  */
 'use strict';
 // app/service/user.js
@@ -309,6 +309,9 @@ class OrderService extends Service {
           } else {
             cb(null, null);
           }
+        })
+        .catch(() => {
+          cb(null, null);
         });
     });
     return itemInfoList.filter(item => item);
