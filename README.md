@@ -67,3 +67,6 @@ select count(*) from sku_ids;
   2. 账号无法获取 unionId, 未关注公众号
 
 [egg]: https://eggjs.org
+
+
+200410212001

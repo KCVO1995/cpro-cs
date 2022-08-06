@@ -5,7 +5,7 @@
  * :copyright: (c) 2022, Tungee
  * :date created: 2022-06-20 21:34:58
  * :last editor: 李彦辉Jacky
- * :date last edited: 2022-08-06 09:50:04
+ * :date last edited: 2022-08-06 13:56:53
  */
 'use strict';
 // app/service/user.js
@@ -212,7 +212,7 @@ class OrderService extends Service {
       payTime:
         order.payment_status === 'paid' ? ctx.helper.getTime(order.pay_at) : '',
       payType: 1,
-      outerOrderNo: order.order_no,
+      outerOrderNo: `.${order.order_no}`,
       saleChannelType: 10001,
       bizSourceType: 1,
       orderStatus,
