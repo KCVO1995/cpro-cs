@@ -44,10 +44,11 @@ class OrderService extends Service {
       // 创建时间
       timeList.push({ type: 101, value: ctx.helper.getTime(order.created_at) });
     }
-    if (order.pay_at) {
+    if (order.payment_status === 'paid') {
       // 支付时间
-      timeList.push({ type: 102, value: ctx.helper.getTime(order.pay_at) });
-      timeList.push({ type: 103, value: ctx.helper.getTime(order.pay_at) });
+      const fakePayTime = new Date(order.created_at).getTime() + 1000; // 订单改价时，没有支付时间，需要自己生成
+      timeList.push({ type: 102, value: ctx.helper.getTime(order.pay_at || fakePayTime) });
+      timeList.push({ type: 103, value: ctx.helper.getTime(order.pay_at || fakePayTime) });
     }
     if (
       order.shipments.length > 0 &&
@@ -55,11 +56,6 @@ class OrderService extends Service {
         order.shipment_status === 'partial' ||
         order.shipment_status === 'pending')
     ) {
-      // 可发货时间
-      timeList.push({
-        type: 103,
-        value: ctx.helper.getTime(order.shipments[0].created_at),
-      });
       // 首次发货时间
       timeList.push({
         type: 104,
@@ -72,11 +68,6 @@ class OrderService extends Service {
       });
     }
     if (order.shipments.length > 0 && order.shipment_status === 'recieved') {
-      // 可发货时间
-      timeList.push({
-        type: 103,
-        value: ctx.helper.getTime(order.shipments[0].created_at),
-      });
       // 首次发货时间
       timeList.push({
         type: 104,
