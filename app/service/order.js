@@ -52,23 +52,37 @@ class OrderService extends Service {
     if (
       order.shipments.length > 0 &&
       (order.shipment_status === 'sending' ||
-        order.shipment_status === 'partial')
+        order.shipment_status === 'partial' ||
+        order.shipment_status === 'pending')
     ) {
+      // 可发货时间
+      timeList.push({
+        type: 103,
+        value: ctx.helper.getTime(order.shipments[0].created_at),
+      });
       // 首次发货时间
       timeList.push({
         type: 104,
         value: ctx.helper.getTime(order.shipments[0].created_at),
       });
+      // 发货完成时间
       timeList.push({
         type: 105,
         value: ctx.helper.getTime(order.shipments[0].updated_at),
       });
     }
     if (order.shipments.length > 0 && order.shipment_status === 'recieved') {
+      // 可发货时间
+      timeList.push({
+        type: 103,
+        value: ctx.helper.getTime(order.shipments[0].created_at),
+      });
+      // 首次发货时间
       timeList.push({
         type: 104,
         value: ctx.helper.getTime(order.shipments[0].created_at),
       });
+      // 发货完成时间
       timeList.push({
         type: 105,
         value: ctx.helper.getTime(order.shipments[0].updated_at),
