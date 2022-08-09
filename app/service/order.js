@@ -127,7 +127,7 @@ class OrderService extends Service {
       },
       receiverInfo: {
         receiverMobile: address.mobile,
-        receiverName: address.name,
+        receiverName: address.name.substr(0, 28),
       },
     };
   }
