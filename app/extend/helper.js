@@ -42,6 +42,7 @@ const openApi = new Proxy(
 
 
 module.exports = {
+  openApi,
   getYhsdProduct(productId) {
     return openApi.get(`/products/${productId}`).then(res => {
       return res.product;

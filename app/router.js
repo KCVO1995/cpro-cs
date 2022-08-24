@@ -50,4 +50,8 @@ module.exports = app => {
   // router.post('/order/refuse_refund', controller.customer.update);
   // webhook 更新订单
   // router.post('/order/update', controller.order.update);
+  // ----
+  router.get('/yhsd/api/*', controller.yhsdApi.api);
+  router.post('/yhsd/api/*', controller.yhsdApi.api);
+  router.put('/yhsd/api/*', controller.yhsdApi.api);
 };

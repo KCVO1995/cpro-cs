@@ -10,6 +10,7 @@
     "async": "^3.2.4",
     "dotenv": "^16.0.1",
     "egg": "^2.15.1",
+    "egg-cors": "^2.2.3",
     "egg-scripts": "^2.11.0",
     "egg-sequelize": "^6.0.0",
     "mysql2": "^2.3.3",
